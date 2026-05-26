@@ -60,38 +60,31 @@ export default function App() {
 
       <div className="flex items-center justify-between px-10 py-8">
 
-        <div className="flex items-center gap-5">
+        <div>
+          <h1 className="text-6xl font-black tracking-wide">
+            ANGEL
+          </h1>
 
-          <img
-            src="/logo.png"
-            alt="Angel Tournaments"
-            className="w-32 h-32 object-contain"
-          />
-
-          <div>
-            <h1 className="text-6xl font-black tracking-wide">
-              ANGEL
-            </h1>
-
-            <p className="text-zinc-400 tracking-[0.5em] uppercase">
-              TOURNAMENTS
-            </p>
-          </div>
-
+          <p className="text-zinc-400 tracking-[0.5em] uppercase">
+            TOURNAMENTS
+          </p>
         </div>
 
-        <button
-          onClick={() => {
-            if (adminMode) {
-              setAdminMode(false);
-            } else {
-              setShowLogin(true);
-            }
-          }}
-          className="bg-white text-black px-7 py-4 rounded-2xl font-black"
-        >
-          {adminMode ? "Ausloggen" : "Admin Login"}
-        </button>
+        {!adminMode ? (
+          <button
+            onClick={() => setShowLogin(true)}
+            className="bg-white text-black px-7 py-4 rounded-2xl font-black"
+          >
+            Admin Login
+          </button>
+        ) : (
+          <button
+            onClick={() => setAdminMode(false)}
+            className="bg-zinc-900 border border-zinc-700 text-white px-7 py-4 rounded-2xl font-black"
+          >
+            Logout
+          </button>
+        )}
 
       </div>
 
@@ -197,7 +190,7 @@ export default function App() {
                 Viertelfinale
               </h2>
 
-              <div className="space-y-10">
+              <div className="space-y-12">
 
                 {[0, 1, 2, 3].map((i) => (
 
@@ -206,35 +199,39 @@ export default function App() {
                     className="bg-[#0d1220] border border-white/10 rounded-3xl p-6"
                   >
 
-                    {[teams[i * 2], teams[i * 2 + 1]].map((team, idx) => (
+                    <div className="flex items-center justify-between pb-5">
 
-                      <div
-                        key={idx}
-                        className={`flex items-center justify-between ${
-                          idx === 0
-                            ? "pb-4"
-                            : "pt-4 border-t border-white/10"
-                        }`}
-                      >
+                      <span className="text-2xl font-black">
+                        {teams[i * 2] || "TBD"}
+                      </span>
 
-                        <span className="text-2xl font-black">
-                          {team || "TBD"}
-                        </span>
+                      {adminMode && teams[i * 2] && (
+                        <button
+                          onClick={() => addSemi(teams[i * 2])}
+                          className="bg-white text-black px-5 py-3 rounded-xl font-black"
+                        >
+                          Weiter
+                        </button>
+                      )}
 
-                        {adminMode && team && (
+                    </div>
 
-                          <button
-                            onClick={() => addSemi(team)}
-                            className="bg-white text-black px-5 py-3 rounded-xl font-black"
-                          >
-                            Weiter
-                          </button>
+                    <div className="border-t border-white/10 pt-5 flex items-center justify-between">
 
-                        )}
+                      <span className="text-2xl font-black">
+                        {teams[i * 2 + 1] || "TBD"}
+                      </span>
 
-                      </div>
+                      {adminMode && teams[i * 2 + 1] && (
+                        <button
+                          onClick={() => addSemi(teams[i * 2 + 1])}
+                          className="bg-white text-black px-5 py-3 rounded-xl font-black"
+                        >
+                          Weiter
+                        </button>
+                      )}
 
-                    ))}
+                    </div>
 
                   </div>
 
@@ -252,7 +249,7 @@ export default function App() {
                 Halbfinale
               </h2>
 
-              <div className="space-y-24 mt-24">
+              <div className="space-y-32 mt-24">
 
                 {[0, 1].map((i) => (
 
@@ -261,35 +258,39 @@ export default function App() {
                     className="bg-[#0d1220] border border-cyan-400 rounded-3xl p-6"
                   >
 
-                    {[semiFinals[i * 2], semiFinals[i * 2 + 1]].map((team, idx) => (
+                    <div className="flex items-center justify-between pb-5">
 
-                      <div
-                        key={idx}
-                        className={`flex items-center justify-between ${
-                          idx === 0
-                            ? "pb-4"
-                            : "pt-4 border-t border-white/10"
-                        }`}
-                      >
+                      <span className="text-2xl font-black">
+                        {semiFinals[i * 2] || "TBD"}
+                      </span>
 
-                        <span className="text-2xl font-black">
-                          {team || "TBD"}
-                        </span>
+                      {adminMode && semiFinals[i * 2] && (
+                        <button
+                          onClick={() => addFinal(semiFinals[i * 2])}
+                          className="bg-white text-black px-5 py-3 rounded-xl font-black"
+                        >
+                          Weiter
+                        </button>
+                      )}
 
-                        {adminMode && team && (
+                    </div>
 
-                          <button
-                            onClick={() => addFinal(team)}
-                            className="bg-white text-black px-5 py-3 rounded-xl font-black"
-                          >
-                            Weiter
-                          </button>
+                    <div className="border-t border-white/10 pt-5 flex items-center justify-between">
 
-                        )}
+                      <span className="text-2xl font-black">
+                        {semiFinals[i * 2 + 1] || "TBD"}
+                      </span>
 
-                      </div>
+                      {adminMode && semiFinals[i * 2 + 1] && (
+                        <button
+                          onClick={() => addFinal(semiFinals[i * 2 + 1])}
+                          className="bg-white text-black px-5 py-3 rounded-xl font-black"
+                        >
+                          Weiter
+                        </button>
+                      )}
 
-                    ))}
+                    </div>
 
                   </div>
 
@@ -307,37 +308,41 @@ export default function App() {
                 Finale
               </h2>
 
-              <div className="bg-[#0d1220] border border-yellow-400 rounded-3xl p-6 mt-52">
+              <div className="bg-[#0d1220] border border-yellow-400 rounded-3xl p-6 mt-56">
 
-                {[finals[0], finals[1]].map((team, idx) => (
+                <div className="flex items-center justify-between pb-5">
 
-                  <div
-                    key={idx}
-                    className={`flex items-center justify-between ${
-                      idx === 0
-                        ? "pb-4"
-                        : "pt-4 border-t border-white/10"
-                    }`}
-                  >
+                  <span className="text-2xl font-black">
+                    {finals[0] || "TBD"}
+                  </span>
 
-                    <span className="text-2xl font-black">
-                      {team || "TBD"}
-                    </span>
+                  {adminMode && finals[0] && (
+                    <button
+                      onClick={() => setWinner(finals[0])}
+                      className="bg-yellow-400 text-black px-5 py-3 rounded-xl font-black"
+                    >
+                      Sieger?
+                    </button>
+                  )}
 
-                    {adminMode && team && (
+                </div>
 
-                      <button
-                        onClick={() => setWinner(team)}
-                        className="bg-yellow-400 text-black px-5 py-3 rounded-xl font-black"
-                      >
-                        Sieger?
-                      </button>
+                <div className="border-t border-white/10 pt-5 flex items-center justify-between">
 
-                    )}
+                  <span className="text-2xl font-black">
+                    {finals[1] || "TBD"}
+                  </span>
 
-                  </div>
+                  {adminMode && finals[1] && (
+                    <button
+                      onClick={() => setWinner(finals[1])}
+                      className="bg-yellow-400 text-black px-5 py-3 rounded-xl font-black"
+                    >
+                      Sieger?
+                    </button>
+                  )}
 
-                ))}
+                </div>
 
               </div>
 
