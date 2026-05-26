@@ -40,7 +40,10 @@ export default function App() {
     const quarters = [];
 
     for (let i = 0; i < shuffled.length; i += 2) {
-      quarterFinals.push([shuffled[i], shuffled[i + 1]]);
+      quarters.push([
+        shuffled[i] || "TBD",
+        shuffled[i + 1] || "TBD",
+      ]);
     }
 
     setQuarterFinals(quarters);
@@ -51,13 +54,13 @@ export default function App() {
 
   const advanceToSemi = (team) => {
     if (semiFinals.length < 4) {
-      setSemiFinals([...semiFinals, team]);
+      setSemiFinals((prev) => [...prev, team]);
     }
   };
 
   const advanceToFinal = (team) => {
     if (finals.length < 2) {
-      setFinals([...finals, team]);
+      setFinals((prev) => [...prev, team]);
     }
   };
 
@@ -71,9 +74,9 @@ export default function App() {
         <div className="flex items-center gap-5">
 
           <img
-            src="/logo.png"
-            alt="Angel Tournaments"
-            className="w-24 h-24 object-contain"
+            src="./logo.png"
+            alt="Angel"
+            className="w-28 h-28 object-contain"
           />
 
           <div>
@@ -201,7 +204,7 @@ export default function App() {
 
           <div className="grid grid-cols-3 gap-24">
 
-            {/* VIERTELFINALE */}
+            {/* VF */}
 
             <div>
 
@@ -256,7 +259,7 @@ export default function App() {
 
             </div>
 
-            {/* HALBFINALE */}
+            {/* HF */}
 
             <div>
 
