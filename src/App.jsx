@@ -8,11 +8,13 @@ export default function App() {
   const [password, setPassword] = useState("");
 
   const [teamsInput, setTeamsInput] = useState("");
-  const [teams, setTeams] = useState([]);
+  const [cupName, setCupName] = useState("");
+
+  const [tournaments, setTournaments] = useState([]);
+  const [selectedTournament, setSelectedTournament] = useState(null);
 
   const [semiFinals, setSemiFinals] = useState([]);
   const [finals, setFinals] = useState([]);
-
   const [winner, setWinner] = useState("");
 
   const ADMIN_USER = "AngelAdmin";
@@ -35,10 +37,18 @@ export default function App() {
       .map((t) => t.trim())
       .filter(Boolean);
 
-    setTeams(shuffle(list));
-    setSemiFinals([]);
-    setFinals([]);
-    setWinner("");
+    const shuffled = shuffle(list);
+
+    const newTournament = {
+      id: Date.now(),
+      name: cupName,
+      teams: shuffled,
+    };
+
+    setTournaments([...tournaments, newTournament]);
+
+    setCupName("");
+    setTeamsInput("");
   };
 
   const addSemi = (team) => {
@@ -153,8 +163,16 @@ export default function App() {
         <div className="max-w-3xl mx-auto mt-20 bg-[#0d1220] border border-white/10 rounded-[40px] p-10">
 
           <h2 className="text-5xl font-black text-center mb-10">
-            Welcome Cup erstellen
+            Turnier erstellen
           </h2>
+
+          <input
+            type="text"
+            placeholder="Turniername"
+            value={cupName}
+            onChange={(e) => setCupName(e.target.value)}
+            className="w-full bg-black border border-zinc-700 rounded-2xl p-5 mb-6"
+          />
 
           <textarea
             placeholder="Ein Team pro Zeile"
@@ -167,18 +185,63 @@ export default function App() {
             onClick={createCup}
             className="w-full mt-8 bg-white text-black py-5 rounded-2xl text-xl font-black"
           >
-            Teams auslosen
+            Turnier erstellen
           </button>
 
         </div>
 
       )}
 
+      {/* TURNIERE */}
+
+      <div className="mt-32 px-10">
+
+        <h2 className="text-5xl font-black text-center mb-16">
+          Laufende Turniere
+        </h2>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 max-w-5xl mx-auto">
+
+          {tournaments.map((tournament) => (
+
+            <div
+              key={tournament.id}
+              className="bg-[#0d1220] border border-white/10 rounded-3xl p-8"
+            >
+
+              <h3 className="text-3xl font-black mb-6">
+                {tournament.name}
+              </h3>
+
+              <button
+                onClick={() => {
+                  setSelectedTournament(tournament);
+                  setSemiFinals([]);
+                  setFinals([]);
+                  setWinner("");
+                }}
+                className="bg-white text-black px-6 py-4 rounded-2xl font-black"
+              >
+                Turnier öffnen
+              </button>
+
+            </div>
+
+          ))}
+
+        </div>
+
+      </div>
+
       {/* TURNIERBAUM */}
 
-      {teams.length > 0 && (
+      {selectedTournament && (
 
         <div className="min-w-[1800px] px-20 py-24">
+
+          <h2 className="text-6xl font-black text-center mb-20">
+            {selectedTournament.name}
+          </h2>
 
           <div className="grid grid-cols-3 gap-24">
 
@@ -202,12 +265,12 @@ export default function App() {
                     <div className="flex items-center justify-between pb-5">
 
                       <span className="text-2xl font-black">
-                        {teams[i * 2] || "TBD"}
+                        {selectedTournament.teams[i * 2] || "TBD"}
                       </span>
 
-                      {adminMode && teams[i * 2] && (
+                      {adminMode && selectedTournament.teams[i * 2] && (
                         <button
-                          onClick={() => addSemi(teams[i * 2])}
+                          onClick={() => addSemi(selectedTournament.teams[i * 2])}
                           className="bg-white text-black px-5 py-3 rounded-xl font-black"
                         >
                           Weiter
@@ -219,12 +282,12 @@ export default function App() {
                     <div className="border-t border-white/10 pt-5 flex items-center justify-between">
 
                       <span className="text-2xl font-black">
-                        {teams[i * 2 + 1] || "TBD"}
+                        {selectedTournament.teams[i * 2 + 1] || "TBD"}
                       </span>
 
-                      {adminMode && teams[i * 2 + 1] && (
+                      {adminMode && selectedTournament.teams[i * 2 + 1] && (
                         <button
-                          onClick={() => addSemi(teams[i * 2 + 1])}
+                          onClick={() => addSemi(selectedTournament.teams[i * 2 + 1])}
                           className="bg-white text-black px-5 py-3 rounded-xl font-black"
                         >
                           Weiter
@@ -355,7 +418,7 @@ export default function App() {
                   </div>
 
                   <p className="text-2xl text-zinc-300 mt-4">
-                    gewinnt den Angel Welcome Cup!
+                    gewinnt das Turnier!
                   </p>
 
                 </div>
