@@ -3,14 +3,14 @@ import { useState } from "react";
 export default function App() {
   const [adminMode, setAdminMode] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
-
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
   const [teamsInput, setTeamsInput] = useState("");
-  const [quarterFinals, setQuarterFinals] = useState([]);
-
-  const [cupCreated, setCupCreated] = useState(false);
+  const [teams, setTeams] = useState([]);
+  const [semi, setSemi] = useState([]);
+  const [finals, setFinals] = useState([]);
+  const [winner, setWinner] = useState("");
 
   const ADMIN_USER = "AngelAdmin";
   const ADMIN_PASS = "AT2026";
@@ -22,340 +22,216 @@ export default function App() {
     }
   };
 
-  const shuffleArray = (array) => {
-    return [...array].sort(() => Math.random() - 0.5);
-  };
+  const shuffle = (arr) => [...arr].sort(() => Math.random() - 0.5);
 
   const createCup = () => {
-    const teamList = teamsInput
+    const list = teamsInput
       .split("\n")
-      .map((team) => team.trim())
+      .map((t) => t.trim())
       .filter(Boolean);
 
-    const shuffled = shuffleArray(teamList);
+    setTeams(shuffle(list));
+    setSemi([]);
+    setFinals([]);
+    setWinner("");
+  };
 
-    const matches = [];
+  const addSemi = (team) => {
+    if (!semi.includes(team)) setSemi([...semi, team]);
+  };
 
-    for (let i = 0; i < shuffled.length; i += 2) {
-      matches.push([
-        shuffled[i] || "TBD",
-        shuffled[i + 1] || "TBD",
-      ]);
-    }
-
-    setQuarterFinals(matches);
-    setCupCreated(true);
+  const addFinal = (team) => {
+    if (!finals.includes(team)) setFinals([...finals, team]);
   };
 
   return (
-    <div
-      style={{
-        backgroundColor: "#000",
-        color: "white",
-        minHeight: "100vh",
-        fontFamily: "Arial, sans-serif",
-      }}
-    >
-      {/* HEADER */}
-
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          padding: "30px 50px",
-        }}
-      >
+    <div className="min-h-screen bg-black text-white p-8">
+      <div className="flex justify-between items-center mb-12">
         <div>
-          <h1
-            style={{
-              fontSize: "60px",
-              fontWeight: "900",
-              margin: "0",
-            }}
-          >
-            ANGEL
-          </h1>
-
-          <p
-            style={{
-              margin: "0",
-              color: "#999",
-              letterSpacing: "8px",
-              fontSize: "14px",
-            }}
-          >
-            TOURNAMENTS
-          </p>
+          <h1 className="text-6xl font-black">ANGEL</h1>
+          <p className="text-zinc-400 tracking-[0.4em]">TOURNAMENTS</p>
         </div>
 
-        {!adminMode ? (
-          <button
-            onClick={() => setShowLogin(true)}
-            style={{
-              background: "white",
-              color: "black",
-              border: "none",
-              padding: "15px 30px",
-              borderRadius: "15px",
-              fontWeight: "bold",
-              cursor: "pointer",
-            }}
-          >
-            Admin Login
-          </button>
-        ) : (
-          <button
-            onClick={() => setAdminMode(false)}
-            style={{
-              background: "#111",
-              color: "white",
-              border: "1px solid #444",
-              padding: "15px 30px",
-              borderRadius: "15px",
-              fontWeight: "bold",
-              cursor: "pointer",
-            }}
-          >
-            Logout
-          </button>
-        )}
-      </div>
-
-      {/* BIO */}
-
-      <div
-        style={{
-          textAlign: "center",
-          marginTop: "120px",
-          padding: "0 20px",
-        }}
-      >
-        <h2
-          style={{
-            fontSize: "75px",
-            fontWeight: "900",
-            marginBottom: "30px",
+        <button
+          onClick={() => {
+            if (adminMode) {
+              setAdminMode(false);
+            } else {
+              setShowLogin(true);
+            }
           }}
+          className="bg-white text-black px-6 py-3 rounded-2xl font-bold"
         >
-          Willkommen bei Angel Tournaments 🏆
-        </h2>
-
-        <p
-          style={{
-            fontSize: "28px",
-            color: "#cfcfcf",
-            maxWidth: "1100px",
-            margin: "0 auto",
-            lineHeight: "1.6",
-          }}
-        >
-          Die neue FC 26 Pro Clubs Plattform für spannende Cups,
-          starke Communities und echte Wettbewerbe.
-        </p>
+          {adminMode ? "Ausloggen" : "Admin Login"}
+        </button>
       </div>
-
-      {/* LOGIN */}
 
       {showLogin && (
-        <div
-          style={{
-            position: "fixed",
-            inset: "0",
-            background: "rgba(0,0,0,0.85)",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            zIndex: "999",
-          }}
-        >
-          <div
-            style={{
-              background: "#111",
-              padding: "40px",
-              borderRadius: "25px",
-              width: "400px",
-            }}
-          >
-            <h2
-              style={{
-                textAlign: "center",
-                fontSize: "35px",
-                marginBottom: "30px",
-              }}
-            >
-              ADMIN LOGIN
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center">
+          <div className="bg-zinc-900 p-8 rounded-3xl w-full max-w-md">
+            <h2 className="text-3xl font-black mb-6 text-center">
+              Admin Login
             </h2>
 
-            <input
-              type="text"
-              placeholder="Benutzername"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              style={{
-                width: "100%",
-                padding: "15px",
-                marginBottom: "15px",
-                borderRadius: "12px",
-                border: "1px solid #333",
-                background: "#000",
-                color: "white",
-              }}
-            />
+            <div className="space-y-4">
+              <input
+                className="w-full bg-black border border-zinc-700 rounded-xl p-4"
+                placeholder="Benutzername"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+              />
 
-            <input
-              type="password"
-              placeholder="Passwort"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              style={{
-                width: "100%",
-                padding: "15px",
-                marginBottom: "20px",
-                borderRadius: "12px",
-                border: "1px solid #333",
-                background: "#000",
-                color: "white",
-              }}
-            />
+              <input
+                type="password"
+                className="w-full bg-black border border-zinc-700 rounded-xl p-4"
+                placeholder="Passwort"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
 
-            <button
-              onClick={login}
-              style={{
-                width: "100%",
-                padding: "15px",
-                borderRadius: "12px",
-                border: "none",
-                background: "white",
-                color: "black",
-                fontWeight: "bold",
-                cursor: "pointer",
-              }}
-            >
-              Einloggen
-            </button>
+              <button
+                onClick={login}
+                className="w-full bg-white text-black p-4 rounded-xl font-black"
+              >
+                Einloggen
+              </button>
+            </div>
           </div>
         </div>
       )}
 
-      {/* ADMIN PANEL */}
-
       {adminMode && (
-        <div
-          style={{
-            maxWidth: "900px",
-            margin: "100px auto",
-            background: "#111",
-            padding: "40px",
-            borderRadius: "30px",
-          }}
-        >
-          <h2
-            style={{
-              textAlign: "center",
-              fontSize: "45px",
-              marginBottom: "30px",
-            }}
-          >
-            Turnier erstellen
+        <div className="bg-zinc-900 p-8 rounded-3xl mb-16 max-w-2xl">
+          <h2 className="text-4xl font-black mb-6">
+            Welcome Cup erstellen
           </h2>
 
           <textarea
+            className="w-full h-56 bg-black border border-zinc-700 rounded-2xl p-4"
             placeholder="Ein Team pro Zeile"
             value={teamsInput}
             onChange={(e) => setTeamsInput(e.target.value)}
-            style={{
-              width: "100%",
-              height: "250px",
-              background: "#000",
-              color: "white",
-              border: "1px solid #333",
-              borderRadius: "20px",
-              padding: "20px",
-              fontSize: "18px",
-            }}
           />
 
           <button
             onClick={createCup}
-            style={{
-              marginTop: "25px",
-              width: "100%",
-              padding: "18px",
-              borderRadius: "20px",
-              border: "none",
-              background: "white",
-              color: "black",
-              fontWeight: "bold",
-              fontSize: "20px",
-              cursor: "pointer",
-            }}
+            className="mt-6 bg-white text-black px-8 py-4 rounded-2xl font-black"
           >
-            Teams auslosen & Cup speichern
+            Teams auslosen
           </button>
         </div>
       )}
 
-      {/* CUP */}
+      {teams.length > 0 && (
+        <div className="grid grid-cols-3 gap-16">
+          <div>
+            <h2 className="text-3xl font-black mb-8 text-center">
+              Viertelfinale
+            </h2>
 
-      {cupCreated && (
-        <div
-          style={{
-            marginTop: "80px",
-            padding: "40px",
-          }}
-        >
-          <h2
-            style={{
-              textAlign: "center",
-              fontSize: "50px",
-              marginBottom: "50px",
-            }}
-          >
-            ANGEL WELCOME CUP
-          </h2>
-
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr",
-              gap: "25px",
-              maxWidth: "900px",
-              margin: "0 auto",
-            }}
-          >
-            {quarterFinals.map((match, index) => (
-              <div
-                key={index}
-                style={{
-                  background: "#111",
-                  padding: "25px",
-                  borderRadius: "20px",
-                  border: "1px solid #333",
-                }}
-              >
+            <div className="space-y-8">
+              {[0, 1, 2, 3].map((i) => (
                 <div
-                  style={{
-                    paddingBottom: "15px",
-                    borderBottom: "1px solid #333",
-                    fontSize: "24px",
-                    fontWeight: "bold",
-                  }}
+                  key={i}
+                  className="bg-zinc-900 border border-zinc-800 rounded-3xl p-6"
                 >
-                  {match[0]}
+                  {[teams[i * 2], teams[i * 2 + 1]].map((team, idx) => (
+                    <div
+                      key={idx}
+                      className={`flex justify-between items-center ${
+                        idx === 0 ? "pb-4" : "pt-4 border-t border-zinc-700"
+                      }`}
+                    >
+                      <span className="font-bold text-xl">{team || "TBD"}</span>
+
+                      {adminMode && team && (
+                        <button
+                          onClick={() => addSemi(team)}
+                          className="bg-white text-black px-4 py-2 rounded-xl font-bold"
+                        >
+                          Weiter
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <h2 className="text-3xl font-black mb-8 text-center">
+              Halbfinale
+            </h2>
+
+            <div className="space-y-16 mt-24">
+              {[0, 1].map((i) => (
+                <div
+                  key={i}
+                  className="bg-zinc-900 border border-zinc-800 rounded-3xl p-6"
+                >
+                  {[semi[i * 2], semi[i * 2 + 1]].map((team, idx) => (
+                    <div
+                      key={idx}
+                      className={`flex justify-between items-center ${
+                        idx === 0 ? "pb-4" : "pt-4 border-t border-zinc-700"
+                      }`}
+                    >
+                      <span className="font-bold text-xl">{team || "TBD"}</span>
+
+                      {adminMode && team && (
+                        <button
+                          onClick={() => addFinal(team)}
+                          className="bg-white text-black px-4 py-2 rounded-xl font-bold"
+                        >
+                          Weiter
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <h2 className="text-3xl font-black mb-8 text-center">
+              Finale
+            </h2>
+
+            <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-6 mt-40">
+              {[finals[0], finals[1]].map((team, idx) => (
+                <div
+                  key={idx}
+                  className={`flex justify-between items-center ${
+                    idx === 0 ? "pb-4" : "pt-4 border-t border-zinc-700"
+                  }`}
+                >
+                  <span className="font-bold text-2xl">{team || "TBD"}</span>
+
+                  {adminMode && team && (
+                    <button
+                      onClick={() => setWinner(team)}
+                      className="bg-yellow-400 text-black px-4 py-2 rounded-xl font-black"
+                    >
+                      Sieger?
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {winner && (
+              <div className="mt-10 text-center">
+                <div className="text-4xl font-black text-yellow-400">
+                  🏆 {winner}
                 </div>
 
-                <div
-                  style={{
-                    paddingTop: "15px",
-                    fontSize: "24px",
-                    fontWeight: "bold",
-                  }}
-                >
-                  {match[1]}
-                </div>
+                <p className="text-xl mt-2">
+                  gewinnt den Angel Welcome Cup!
+                </p>
               </div>
-            ))}
+            )}
           </div>
         </div>
       )}
