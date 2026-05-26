@@ -63,8 +63,7 @@ export default function App() {
   };
 
   const deleteTournament = (id) => {
-    const updated = tournaments.filter((t) => t.id !== id);
-    setTournaments(updated);
+    setTournaments(tournaments.filter((t) => t.id !== id));
 
     if (selectedTournament?.id === id) {
       setSelectedTournament(null);
@@ -244,12 +243,14 @@ export default function App() {
                   Turnier öffnen
                 </button>
 
+                {/* TURNIER LÖSCHEN NUR FÜR ADMINS */}
+
                 {adminMode && (
                   <button
                     onClick={() => deleteTournament(tournament.id)}
                     className="bg-red-600 px-6 py-4 rounded-2xl font-black"
                   >
-                    Löschen
+                    Turnier löschen
                   </button>
                 )}
 
@@ -283,6 +284,8 @@ export default function App() {
                 </p>
               </div>
 
+              {/* ANSICHT SCHLIEßEN FÜR ALLE */}
+
               <button
                 onClick={() => setSelectedTournament(null)}
                 className="bg-white text-black px-6 py-4 rounded-2xl font-black"
@@ -291,6 +294,8 @@ export default function App() {
               </button>
 
             </div>
+
+            {/* TURNIERBAUM */}
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
 
