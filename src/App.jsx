@@ -8,8 +8,8 @@ export default function App() {
   const [password, setPassword] = useState("");
 
   const [teamsInput, setTeamsInput] = useState("");
-  const [teams, setTeams] = useState([]);
 
+  const [quarterFinals, setQuarterFinals] = useState([]);
   const [semiFinals, setSemiFinals] = useState([]);
   const [finals, setFinals] = useState([]);
 
@@ -25,30 +25,38 @@ export default function App() {
     }
   };
 
-  const shuffle = (array) => {
+  const shuffleArray = (array) => {
     return [...array].sort(() => Math.random() - 0.5);
   };
 
   const createCup = () => {
-    const list = teamsInput
+    const teamList = teamsInput
       .split("\n")
-      .map((t) => t.trim())
+      .map((team) => team.trim())
       .filter(Boolean);
 
-    setTeams(shuffle(list));
+    const shuffled = shuffleArray(teamList);
+
+    const quarters = [];
+
+    for (let i = 0; i < shuffled.length; i += 2) {
+      quarterFinals.push([shuffled[i], shuffled[i + 1]]);
+    }
+
+    setQuarterFinals(quarters);
     setSemiFinals([]);
     setFinals([]);
     setWinner("");
   };
 
-  const addSemi = (team) => {
-    if (!semiFinals.includes(team) && semiFinals.length < 4) {
+  const advanceToSemi = (team) => {
+    if (semiFinals.length < 4) {
       setSemiFinals([...semiFinals, team]);
     }
   };
 
-  const addFinal = (team) => {
-    if (!finals.includes(team) && finals.length < 2) {
+  const advanceToFinal = (team) => {
+    if (finals.length < 2) {
       setFinals([...finals, team]);
     }
   };
@@ -58,24 +66,26 @@ export default function App() {
 
       {/* HEADER */}
 
-      <div className="flex items-center justify-between px-10 py-8">
+      <div className="flex items-center justify-between px-10 py-6">
 
         <div className="flex items-center gap-5">
 
           <img
             src="/logo.png"
             alt="Angel Tournaments"
-            className="w-32 h-32 object-contain"
+            className="w-24 h-24 object-contain"
           />
 
           <div>
-            <h1 className="text-6xl font-black tracking-wide">
+
+            <h1 className="text-5xl font-black leading-none">
               ANGEL
             </h1>
 
-            <p className="text-zinc-400 tracking-[0.5em] uppercase">
+            <p className="text-zinc-400 tracking-[0.45em] text-sm mt-2">
               TOURNAMENTS
             </p>
+
           </div>
 
         </div>
@@ -99,7 +109,7 @@ export default function App() {
 
       <div className="text-center mt-10 px-6">
 
-        <h2 className="text-5xl font-black">
+        <h2 className="text-6xl font-black">
           Willkommen bei Angel Tournaments 🏆
         </h2>
 
@@ -113,9 +123,10 @@ export default function App() {
       {/* LOGIN */}
 
       {showLogin && (
+
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
 
-          <div className="bg-zinc-900 p-8 rounded-3xl w-full max-w-md">
+          <div className="bg-[#0d1220] p-10 rounded-[35px] w-full max-w-md">
 
             <h2 className="text-4xl font-black text-center mb-8">
               ADMIN LOGIN
@@ -128,7 +139,7 @@ export default function App() {
                 placeholder="Benutzername"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="w-full bg-black border border-zinc-700 rounded-xl p-4"
+                className="w-full bg-black border border-zinc-700 rounded-2xl p-4"
               />
 
               <input
@@ -136,12 +147,12 @@ export default function App() {
                 placeholder="Passwort"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full bg-black border border-zinc-700 rounded-xl p-4"
+                className="w-full bg-black border border-zinc-700 rounded-2xl p-4"
               />
 
               <button
                 onClick={login}
-                className="w-full bg-white text-black p-4 rounded-xl font-black"
+                className="w-full bg-white text-black p-4 rounded-2xl font-black"
               >
                 Einloggen
               </button>
@@ -151,6 +162,7 @@ export default function App() {
           </div>
 
         </div>
+
       )}
 
       {/* ADMIN PANEL */}
@@ -167,12 +179,12 @@ export default function App() {
             placeholder="Ein Team pro Zeile"
             value={teamsInput}
             onChange={(e) => setTeamsInput(e.target.value)}
-            className="w-full h-72 bg-black border border-zinc-700 rounded-2xl p-5"
+            className="w-full h-72 bg-black border border-zinc-700 rounded-3xl p-5"
           />
 
           <button
             onClick={createCup}
-            className="w-full mt-8 bg-white text-black py-5 rounded-2xl text-xl font-black"
+            className="w-full mt-8 bg-white text-black py-5 rounded-3xl text-xl font-black"
           >
             Teams auslosen
           </button>
@@ -183,9 +195,9 @@ export default function App() {
 
       {/* TURNIERBAUM */}
 
-      {teams.length > 0 && (
+      {quarterFinals.length > 0 && (
 
-        <div className="min-w-[1800px] px-20 py-24">
+        <div className="px-20 py-24 min-w-[1800px]">
 
           <div className="grid grid-cols-3 gap-24">
 
@@ -199,14 +211,14 @@ export default function App() {
 
               <div className="space-y-10">
 
-                {[0, 1, 2, 3].map((i) => (
+                {quarterFinals.map((match, index) => (
 
                   <div
-                    key={i}
+                    key={index}
                     className="bg-[#0d1220] border border-white/10 rounded-3xl p-6"
                   >
 
-                    {[teams[i * 2], teams[i * 2 + 1]].map((team, idx) => (
+                    {match.map((team, idx) => (
 
                       <div
                         key={idx}
@@ -218,13 +230,13 @@ export default function App() {
                       >
 
                         <span className="text-2xl font-black">
-                          {team || "TBD"}
+                          {team}
                         </span>
 
-                        {adminMode && team && (
+                        {adminMode && (
 
                           <button
-                            onClick={() => addSemi(team)}
+                            onClick={() => advanceToSemi(team)}
                             className="bg-white text-black px-5 py-3 rounded-xl font-black"
                           >
                             Weiter
@@ -279,7 +291,7 @@ export default function App() {
                         {adminMode && team && (
 
                           <button
-                            onClick={() => addFinal(team)}
+                            onClick={() => advanceToFinal(team)}
                             className="bg-white text-black px-5 py-3 rounded-xl font-black"
                           >
                             Weiter
