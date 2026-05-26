@@ -3,6 +3,9 @@ import { useState } from "react";
 export default function App() {
   const [isAdmin, setIsAdmin] = useState(false);
 
+  const [showLogin, setShowLogin] = useState(false);
+  const [loginPassword, setLoginPassword] = useState("");
+
   const [tournaments, setTournaments] = useState([]);
   const [selectedTournament, setSelectedTournament] = useState(null);
 
@@ -10,6 +13,16 @@ export default function App() {
   const [teamsInput, setTeamsInput] = useState("");
 
   const adminPassword = "angel123";
+
+  function handleLogin() {
+    if (loginPassword === adminPassword) {
+      setIsAdmin(true);
+      setShowLogin(false);
+      setLoginPassword("");
+    } else {
+      alert("Falsches Passwort");
+    }
+  }
 
   function shuffle(array) {
     return [...array].sort(() => Math.random() - 0.5);
@@ -176,6 +189,77 @@ export default function App() {
         fontFamily: "Arial",
       }}
     >
+      {/* LOGIN MODAL */}
+
+      {showLogin && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0,0,0,0.8)",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: 999,
+          }}
+        >
+          <div
+            style={{
+              background: "#061126",
+              padding: "40px",
+              borderRadius: "30px",
+              width: "400px",
+            }}
+          >
+            <h2
+              style={{
+                fontSize: "40px",
+                marginBottom: "30px",
+                textAlign: "center",
+              }}
+            >
+              Admin Login
+            </h2>
+
+            <input
+              type="password"
+              placeholder="Passwort"
+              value={loginPassword}
+              onChange={(e) =>
+                setLoginPassword(e.target.value)
+              }
+              style={{
+                width: "100%",
+                padding: "18px",
+                borderRadius: "15px",
+                background: "black",
+                color: "white",
+                border: "1px solid #333",
+                marginBottom: "20px",
+                fontSize: "18px",
+              }}
+            />
+
+            <button
+              onClick={handleLogin}
+              style={{
+                width: "100%",
+                background: "white",
+                color: "black",
+                border: "none",
+                padding: "18px",
+                borderRadius: "15px",
+                fontWeight: "bold",
+                cursor: "pointer",
+                fontSize: "20px",
+              }}
+            >
+              Einloggen
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* HEADER */}
 
       <div
@@ -208,15 +292,7 @@ export default function App() {
 
         {!isAdmin ? (
           <button
-            onClick={() => {
-              const pw = prompt("Admin Passwort");
-
-              if (pw === adminPassword) {
-                setIsAdmin(true);
-              } else {
-                alert("Falsches Passwort");
-              }
-            }}
+            onClick={() => setShowLogin(true)}
             style={{
               background: "white",
               color: "black",
@@ -413,7 +489,7 @@ export default function App() {
                   cursor: "pointer",
                 }}
               >
-                Turnier öffnen
+                Turnierbaum öffnen
               </button>
 
               {isAdmin && (
@@ -438,319 +514,6 @@ export default function App() {
           </div>
         ))}
       </div>
-
-      {/* TURNIERBAUM */}
-
-      {selectedTournament && (
-        <div style={{ marginTop: "100px" }}>
-
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              marginBottom: "60px",
-            }}
-          >
-            <h1
-              style={{
-                fontSize: "60px",
-              }}
-            >
-              {selectedTournament.name}
-            </h1>
-
-            <button
-              onClick={() =>
-                setSelectedTournament(null)
-              }
-              style={{
-                background: "white",
-                color: "black",
-                border: "none",
-                padding: "15px 30px",
-                borderRadius: "15px",
-                fontWeight: "bold",
-                cursor: "pointer",
-              }}
-            >
-              Ansicht schließen
-            </button>
-          </div>
-
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr 1fr",
-              gap: "80px",
-            }}
-          >
-            {/* VIERTELFINALE */}
-
-            <div>
-              <h2
-                style={{
-                  fontSize: "40px",
-                  marginBottom: "40px",
-                }}
-              >
-                Viertelfinale
-              </h2>
-
-              {selectedTournament.quarterFinals.map(
-                (match, index) => (
-                  <div
-                    key={index}
-                    style={{
-                      background: "#061126",
-                      padding: "25px",
-                      borderRadius: "25px",
-                      marginBottom: "40px",
-                    }}
-                  >
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent:
-                          "space-between",
-                        marginBottom: "20px",
-                      }}
-                    >
-                      <span>{match.team1}</span>
-
-                      {isAdmin && (
-                        <button
-                          onClick={() =>
-                            advanceQuarterWinner(
-                              selectedTournament.id,
-                              index,
-                              match.team1
-                            )
-                          }
-                        >
-                          Weiter
-                        </button>
-                      )}
-                    </div>
-
-                    <hr />
-
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent:
-                          "space-between",
-                        marginTop: "20px",
-                      }}
-                    >
-                      <span>{match.team2}</span>
-
-                      {isAdmin && (
-                        <button
-                          onClick={() =>
-                            advanceQuarterWinner(
-                              selectedTournament.id,
-                              index,
-                              match.team2
-                            )
-                          }
-                        >
-                          Weiter
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                )
-              )}
-            </div>
-
-            {/* HALBFINALE */}
-
-            <div>
-              <h2
-                style={{
-                  fontSize: "40px",
-                  marginBottom: "40px",
-                }}
-              >
-                Halbfinale
-              </h2>
-
-              {selectedTournament.semiFinals.map(
-                (match, index) => (
-                  <div
-                    key={index}
-                    style={{
-                      background: "#061126",
-                      padding: "25px",
-                      borderRadius: "25px",
-                      marginBottom: "80px",
-                      border: "2px solid cyan",
-                    }}
-                  >
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent:
-                          "space-between",
-                        marginBottom: "20px",
-                      }}
-                    >
-                      <span>
-                        {match.team1 || "TBD"}
-                      </span>
-
-                      {isAdmin && match.team1 && (
-                        <button
-                          onClick={() =>
-                            advanceSemiWinner(
-                              selectedTournament.id,
-                              index,
-                              match.team1
-                            )
-                          }
-                        >
-                          Weiter
-                        </button>
-                      )}
-                    </div>
-
-                    <hr />
-
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent:
-                          "space-between",
-                        marginTop: "20px",
-                      }}
-                    >
-                      <span>
-                        {match.team2 || "TBD"}
-                      </span>
-
-                      {isAdmin && match.team2 && (
-                        <button
-                          onClick={() =>
-                            advanceSemiWinner(
-                              selectedTournament.id,
-                              index,
-                              match.team2
-                            )
-                          }
-                        >
-                          Weiter
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                )
-              )}
-            </div>
-
-            {/* FINALE */}
-
-            <div>
-              <h2
-                style={{
-                  fontSize: "40px",
-                  marginBottom: "40px",
-                }}
-              >
-                Finale
-              </h2>
-
-              <div
-                style={{
-                  background: "#061126",
-                  padding: "25px",
-                  borderRadius: "25px",
-                  border: "2px solid gold",
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent:
-                      "space-between",
-                    marginBottom: "20px",
-                  }}
-                >
-                  <span>
-                    {selectedTournament.final.team1 ||
-                      "TBD"}
-                  </span>
-
-                  {isAdmin &&
-                    selectedTournament.final.team1 && (
-                      <button
-                        onClick={() =>
-                          selectChampion(
-                            selectedTournament.id,
-                            selectedTournament.final
-                              .team1
-                          )
-                        }
-                      >
-                        Sieger
-                      </button>
-                    )}
-                </div>
-
-                <hr />
-
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent:
-                      "space-between",
-                    marginTop: "20px",
-                  }}
-                >
-                  <span>
-                    {selectedTournament.final.team2 ||
-                      "TBD"}
-                  </span>
-
-                  {isAdmin &&
-                    selectedTournament.final.team2 && (
-                      <button
-                        onClick={() =>
-                          selectChampion(
-                            selectedTournament.id,
-                            selectedTournament.final
-                              .team2
-                          )
-                        }
-                      >
-                        Sieger
-                      </button>
-                    )}
-                </div>
-
-                {selectedTournament.final.winner && (
-                  <div
-                    style={{
-                      marginTop: "30px",
-                      color: "#00ff99",
-                      fontWeight: "bold",
-                      fontSize: "24px",
-                    }}
-                  >
-                    🏆 Sieger:{" "}
-                    {
-                      selectedTournament.final
-                        .winner
-                    }
-                  </div>
-                )}
-              </div>
-            </div>
-
-          </div>
-
-        </div>
-      )}
     </div>
   );
 }
