@@ -2,7 +2,6 @@ import { useState } from "react";
 
 export default function App() {
   const [isAdmin, setIsAdmin] = useState(false);
-  const [password, setPassword] = useState("");
 
   const [tournaments, setTournaments] = useState([]);
   const [selectedTournament, setSelectedTournament] = useState(null);
@@ -11,19 +10,6 @@ export default function App() {
   const [teamsInput, setTeamsInput] = useState("");
 
   const adminPassword = "angel123";
-
-  function login() {
-    if (password === adminPassword) {
-      setIsAdmin(true);
-      alert("Admin Login erfolgreich");
-    } else {
-      alert("Falsches Passwort");
-    }
-  }
-
-  function logout() {
-    setIsAdmin(false);
-  }
 
   function shuffle(array) {
     return [...array].sort(() => Math.random() - 0.5);
@@ -47,10 +33,10 @@ export default function App() {
 
     const shuffled = shuffle(teams);
 
-    const matches = [];
+    const quarterFinals = [];
 
     for (let i = 0; i < shuffled.length; i += 2) {
-      matches.push({
+      quarterFinals.push({
         team1: shuffled[i],
         team2: shuffled[i + 1] || "Freilos",
         winner: "",
@@ -60,7 +46,16 @@ export default function App() {
     const newTournament = {
       id: Date.now(),
       name: tournamentName,
-      matches,
+      quarterFinals,
+      semiFinals: [
+        { team1: "", team2: "", winner: "" },
+        { team1: "", team2: "", winner: "" },
+      ],
+      final: {
+        team1: "",
+        team2: "",
+        winner: "",
+      },
     };
 
     setTournaments([...tournaments, newTournament]);
@@ -69,17 +64,86 @@ export default function App() {
     setTeamsInput("");
   }
 
-  function selectWinner(tournamentId, matchIndex, winner) {
+  function advanceQuarterWinner(
+    tournamentId,
+    matchIndex,
+    winner
+  ) {
     const updated = tournaments.map((tournament) => {
       if (tournament.id !== tournamentId) return tournament;
 
-      const updatedMatches = [...tournament.matches];
+      const updatedTournament = { ...tournament };
 
-      updatedMatches[matchIndex].winner = winner;
+      updatedTournament.quarterFinals[matchIndex].winner =
+        winner;
+
+      if (matchIndex < 2) {
+        if (!updatedTournament.semiFinals[0].team1) {
+          updatedTournament.semiFinals[0].team1 = winner;
+        } else {
+          updatedTournament.semiFinals[0].team2 = winner;
+        }
+      } else {
+        if (!updatedTournament.semiFinals[1].team1) {
+          updatedTournament.semiFinals[1].team1 = winner;
+        } else {
+          updatedTournament.semiFinals[1].team2 = winner;
+        }
+      }
+
+      return updatedTournament;
+    });
+
+    setTournaments(updated);
+
+    const updatedTournament = updated.find(
+      (t) => t.id === tournamentId
+    );
+
+    setSelectedTournament(updatedTournament);
+  }
+
+  function advanceSemiWinner(
+    tournamentId,
+    matchIndex,
+    winner
+  ) {
+    const updated = tournaments.map((tournament) => {
+      if (tournament.id !== tournamentId) return tournament;
+
+      const updatedTournament = { ...tournament };
+
+      updatedTournament.semiFinals[matchIndex].winner =
+        winner;
+
+      if (!updatedTournament.final.team1) {
+        updatedTournament.final.team1 = winner;
+      } else {
+        updatedTournament.final.team2 = winner;
+      }
+
+      return updatedTournament;
+    });
+
+    setTournaments(updated);
+
+    const updatedTournament = updated.find(
+      (t) => t.id === tournamentId
+    );
+
+    setSelectedTournament(updatedTournament);
+  }
+
+  function selectChampion(tournamentId, winner) {
+    const updated = tournaments.map((tournament) => {
+      if (tournament.id !== tournamentId) return tournament;
 
       return {
         ...tournament,
-        matches: updatedMatches,
+        final: {
+          ...tournament.final,
+          winner,
+        },
       };
     });
 
@@ -93,7 +157,9 @@ export default function App() {
   }
 
   function deleteTournament(id) {
-    const filtered = tournaments.filter((t) => t.id !== id);
+    const filtered = tournaments.filter(
+      (t) => t.id !== id
+    );
 
     setTournaments(filtered);
 
@@ -111,6 +177,7 @@ export default function App() {
       }}
     >
       {/* HEADER */}
+
       <div
         style={{
           display: "flex",
@@ -157,7 +224,6 @@ export default function App() {
               padding: "15px 30px",
               borderRadius: "20px",
               fontWeight: "bold",
-              height: "60px",
               cursor: "pointer",
             }}
           >
@@ -165,7 +231,7 @@ export default function App() {
           </button>
         ) : (
           <button
-            onClick={logout}
+            onClick={() => setIsAdmin(false)}
             style={{
               background: "white",
               color: "black",
@@ -173,7 +239,6 @@ export default function App() {
               padding: "15px 30px",
               borderRadius: "20px",
               fontWeight: "bold",
-              height: "60px",
               cursor: "pointer",
             }}
           >
@@ -183,10 +248,11 @@ export default function App() {
       </div>
 
       {/* HERO */}
+
       <div
         style={{
           textAlign: "center",
-          marginBottom: "70px",
+          marginBottom: "80px",
         }}
       >
         <h1
@@ -201,7 +267,7 @@ export default function App() {
         <p
           style={{
             color: "#aaa",
-            fontSize: "30px",
+            fontSize: "28px",
             maxWidth: "900px",
             margin: "auto",
             lineHeight: "1.6",
@@ -213,10 +279,11 @@ export default function App() {
       </div>
 
       {/* ADMIN PANEL */}
+
       {isAdmin && (
         <div
           style={{
-            background: "#050b2c",
+            background: "#061126",
             padding: "40px",
             borderRadius: "30px",
             maxWidth: "900px",
@@ -226,9 +293,9 @@ export default function App() {
         >
           <h2
             style={{
-              textAlign: "center",
-              fontSize: "55px",
+              fontSize: "50px",
               marginBottom: "40px",
+              textAlign: "center",
             }}
           >
             Turnier erstellen
@@ -291,6 +358,7 @@ export default function App() {
       )}
 
       {/* TURNIERE */}
+
       <div
         style={{
           maxWidth: "1200px",
@@ -310,7 +378,7 @@ export default function App() {
           <div
             key={tournament.id}
             style={{
-              background: "#050b2c",
+              background: "#061126",
               padding: "30px",
               borderRadius: "25px",
               marginBottom: "30px",
@@ -345,7 +413,7 @@ export default function App() {
                   cursor: "pointer",
                 }}
               >
-                Turnierbaum öffnen
+                Turnier öffnen
               </button>
 
               {isAdmin && (
@@ -372,18 +440,16 @@ export default function App() {
       </div>
 
       {/* TURNIERBAUM */}
+
       {selectedTournament && (
-        <div
-          style={{
-            marginTop: "100px",
-          }}
-        >
+        <div style={{ marginTop: "100px" }}>
+
           <div
             style={{
               display: "flex",
               justifyContent: "space-between",
               alignItems: "center",
-              marginBottom: "50px",
+              marginBottom: "60px",
             }}
           >
             <h1
@@ -395,7 +461,9 @@ export default function App() {
             </h1>
 
             <button
-              onClick={() => setSelectedTournament(null)}
+              onClick={() =>
+                setSelectedTournament(null)
+              }
               style={{
                 background: "white",
                 color: "black",
@@ -417,23 +485,24 @@ export default function App() {
               gap: "80px",
             }}
           >
-            {/* Viertelfinale */}
+            {/* VIERTELFINALE */}
+
             <div>
               <h2
                 style={{
-                  fontSize: "45px",
+                  fontSize: "40px",
                   marginBottom: "40px",
                 }}
               >
                 Viertelfinale
               </h2>
 
-              {selectedTournament.matches.map(
+              {selectedTournament.quarterFinals.map(
                 (match, index) => (
                   <div
                     key={index}
                     style={{
-                      background: "#050b2c",
+                      background: "#061126",
                       padding: "25px",
                       borderRadius: "25px",
                       marginBottom: "40px",
@@ -452,7 +521,7 @@ export default function App() {
                       {isAdmin && (
                         <button
                           onClick={() =>
-                            selectWinner(
+                            advanceQuarterWinner(
                               selectedTournament.id,
                               index,
                               match.team1
@@ -479,7 +548,7 @@ export default function App() {
                       {isAdmin && (
                         <button
                           onClick={() =>
-                            selectWinner(
+                            advanceQuarterWinner(
                               selectedTournament.id,
                               index,
                               match.team2
@@ -490,63 +559,101 @@ export default function App() {
                         </button>
                       )}
                     </div>
-
-                    {match.winner && (
-                      <div
-                        style={{
-                          marginTop: "25px",
-                          color: "#00ff99",
-                          fontWeight: "bold",
-                        }}
-                      >
-                        Gewinner: {match.winner}
-                      </div>
-                    )}
                   </div>
                 )
               )}
             </div>
 
-            {/* Halbfinale */}
+            {/* HALBFINALE */}
+
             <div>
               <h2
                 style={{
-                  fontSize: "45px",
+                  fontSize: "40px",
                   marginBottom: "40px",
                 }}
               >
                 Halbfinale
               </h2>
 
-              <div
-                style={{
-                  background: "#050b2c",
-                  padding: "25px",
-                  borderRadius: "25px",
-                  marginBottom: "40px",
-                  border: "2px solid cyan",
-                }}
-              >
-                TBD
-              </div>
+              {selectedTournament.semiFinals.map(
+                (match, index) => (
+                  <div
+                    key={index}
+                    style={{
+                      background: "#061126",
+                      padding: "25px",
+                      borderRadius: "25px",
+                      marginBottom: "80px",
+                      border: "2px solid cyan",
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent:
+                          "space-between",
+                        marginBottom: "20px",
+                      }}
+                    >
+                      <span>
+                        {match.team1 || "TBD"}
+                      </span>
 
-              <div
-                style={{
-                  background: "#050b2c",
-                  padding: "25px",
-                  borderRadius: "25px",
-                  border: "2px solid cyan",
-                }}
-              >
-                TBD
-              </div>
+                      {isAdmin && match.team1 && (
+                        <button
+                          onClick={() =>
+                            advanceSemiWinner(
+                              selectedTournament.id,
+                              index,
+                              match.team1
+                            )
+                          }
+                        >
+                          Weiter
+                        </button>
+                      )}
+                    </div>
+
+                    <hr />
+
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent:
+                          "space-between",
+                        marginTop: "20px",
+                      }}
+                    >
+                      <span>
+                        {match.team2 || "TBD"}
+                      </span>
+
+                      {isAdmin && match.team2 && (
+                        <button
+                          onClick={() =>
+                            advanceSemiWinner(
+                              selectedTournament.id,
+                              index,
+                              match.team2
+                            )
+                          }
+                        >
+                          Weiter
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                )
+              )}
             </div>
 
-            {/* Finale */}
+            {/* FINALE */}
+
             <div>
               <h2
                 style={{
-                  fontSize: "45px",
+                  fontSize: "40px",
                   marginBottom: "40px",
                 }}
               >
@@ -555,16 +662,93 @@ export default function App() {
 
               <div
                 style={{
-                  background: "#050b2c",
+                  background: "#061126",
                   padding: "25px",
                   borderRadius: "25px",
                   border: "2px solid gold",
                 }}
               >
-                TBD
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent:
+                      "space-between",
+                    marginBottom: "20px",
+                  }}
+                >
+                  <span>
+                    {selectedTournament.final.team1 ||
+                      "TBD"}
+                  </span>
+
+                  {isAdmin &&
+                    selectedTournament.final.team1 && (
+                      <button
+                        onClick={() =>
+                          selectChampion(
+                            selectedTournament.id,
+                            selectedTournament.final
+                              .team1
+                          )
+                        }
+                      >
+                        Sieger
+                      </button>
+                    )}
+                </div>
+
+                <hr />
+
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent:
+                      "space-between",
+                    marginTop: "20px",
+                  }}
+                >
+                  <span>
+                    {selectedTournament.final.team2 ||
+                      "TBD"}
+                  </span>
+
+                  {isAdmin &&
+                    selectedTournament.final.team2 && (
+                      <button
+                        onClick={() =>
+                          selectChampion(
+                            selectedTournament.id,
+                            selectedTournament.final
+                              .team2
+                          )
+                        }
+                      >
+                        Sieger
+                      </button>
+                    )}
+                </div>
+
+                {selectedTournament.final.winner && (
+                  <div
+                    style={{
+                      marginTop: "30px",
+                      color: "#00ff99",
+                      fontWeight: "bold",
+                      fontSize: "24px",
+                    }}
+                  >
+                    🏆 Sieger:{" "}
+                    {
+                      selectedTournament.final
+                        .winner
+                    }
+                  </div>
+                )}
               </div>
             </div>
+
           </div>
+
         </div>
       )}
     </div>
