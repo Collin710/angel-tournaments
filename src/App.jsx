@@ -7,13 +7,12 @@ export default function App() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
+  const [cupName, setCupName] = useState("");
+  const [teamCount, setTeamCount] = useState("");
   const [teamsInput, setTeamsInput] = useState("");
-  const [teams, setTeams] = useState([]);
 
-  const [semiFinals, setSemiFinals] = useState([]);
-  const [finals, setFinals] = useState([]);
-
-  const [winner, setWinner] = useState("");
+  const [tournaments, setTournaments] = useState([]);
+  const [selectedTournament, setSelectedTournament] = useState(null);
 
   const ADMIN_USER = "AngelAdmin";
   const ADMIN_PASS = "AT2026";
@@ -25,47 +24,76 @@ export default function App() {
     }
   };
 
-  const shuffle = (array) => {
+  const shuffleTeams = (array) => {
     return [...array].sort(() => Math.random() - 0.5);
   };
 
-  const createCup = () => {
-    const list = teamsInput
+  const createTournament = () => {
+    const teams = teamsInput
       .split("\n")
-      .map((t) => t.trim())
+      .map((team) => team.trim())
       .filter(Boolean);
 
-    setTeams(shuffle(list));
-    setSemiFinals([]);
-    setFinals([]);
-    setWinner("");
-  };
+    if (teams.length < 2) return;
 
-  const addSemi = (team) => {
-    if (!semiFinals.includes(team) && semiFinals.length < 4) {
-      setSemiFinals([...semiFinals, team]);
+    const shuffledTeams = shuffleTeams(teams);
+
+    let stage = "";
+
+    if (teams.length <= 4) {
+      stage = "Halbfinale";
+    } else if (teams.length <= 8) {
+      stage = "Viertelfinale";
+    } else if (teams.length <= 16) {
+      stage = "Achtelfinale";
+    } else {
+      stage = "Großturnier";
     }
+
+    const matches = [];
+
+    for (let i = 0; i < shuffledTeams.length; i += 2) {
+      matches.push([
+        shuffledTeams[i] || "TBD",
+        shuffledTeams[i + 1] || "TBD",
+      ]);
+    }
+
+    const tournament = {
+      id: Date.now(),
+      name: cupName,
+      stage,
+      matches,
+    };
+
+    setTournaments([...tournaments, tournament]);
+
+    setCupName("");
+    setTeamCount("");
+    setTeamsInput("");
   };
 
-  const addFinal = (team) => {
-    if (!finals.includes(team) && finals.length < 2) {
-      setFinals([...finals, team]);
+  const deleteTournament = (id) => {
+    setTournaments(tournaments.filter((t) => t.id !== id));
+
+    if (selectedTournament?.id === id) {
+      setSelectedTournament(null);
     }
   };
 
   return (
-    <div className="min-h-screen bg-black text-white overflow-x-auto">
+    <div className="min-h-screen bg-black text-white">
 
       {/* HEADER */}
 
-      <div className="flex items-center justify-between px-10 py-8">
+      <div className="flex justify-between items-center px-8 py-6">
 
         <div>
-          <h1 className="text-6xl font-black tracking-wide">
+          <h1 className="text-6xl font-black">
             ANGEL
           </h1>
 
-          <p className="text-zinc-400 tracking-[0.5em] uppercase">
+          <p className="tracking-[0.5em] text-zinc-400">
             TOURNAMENTS
           </p>
         </div>
@@ -80,7 +108,7 @@ export default function App() {
         ) : (
           <button
             onClick={() => setAdminMode(false)}
-            className="bg-zinc-900 border border-zinc-700 text-white px-7 py-4 rounded-2xl font-black"
+            className="bg-zinc-900 border border-zinc-700 px-7 py-4 rounded-2xl font-black"
           >
             Logout
           </button>
@@ -88,15 +116,15 @@ export default function App() {
 
       </div>
 
-      {/* BIO */}
+      {/* HERO */}
 
-      <div className="text-center mt-10 px-6">
+      <div className="text-center mt-12 px-6">
 
-        <h2 className="text-5xl font-black">
+        <h2 className="text-5xl md:text-7xl font-black">
           Willkommen bei Angel Tournaments 🏆
         </h2>
 
-        <p className="text-zinc-400 text-2xl mt-6 max-w-4xl mx-auto leading-relaxed">
+        <p className="text-zinc-400 text-xl md:text-2xl mt-8 max-w-4xl mx-auto leading-relaxed">
           Die neue FC 26 Pro Clubs Plattform für spannende Cups,
           starke Communities und echte Wettbewerbe.
         </p>
@@ -106,12 +134,13 @@ export default function App() {
       {/* LOGIN */}
 
       {showLogin && (
+
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
 
-          <div className="bg-zinc-900 p-8 rounded-3xl w-full max-w-md">
+          <div className="bg-[#081022] p-10 rounded-[40px] w-full max-w-md border border-white/10">
 
             <h2 className="text-4xl font-black text-center mb-8">
-              ADMIN LOGIN
+              Admin Login
             </h2>
 
             <div className="space-y-5">
@@ -121,7 +150,7 @@ export default function App() {
                 placeholder="Benutzername"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="w-full bg-black border border-zinc-700 rounded-xl p-4"
+                className="w-full bg-black border border-zinc-700 rounded-2xl p-4"
               />
 
               <input
@@ -129,12 +158,12 @@ export default function App() {
                 placeholder="Passwort"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full bg-black border border-zinc-700 rounded-xl p-4"
+                className="w-full bg-black border border-zinc-700 rounded-2xl p-4"
               />
 
               <button
                 onClick={login}
-                className="w-full bg-white text-black p-4 rounded-xl font-black"
+                className="w-full bg-white text-black py-4 rounded-2xl font-black"
               >
                 Einloggen
               </button>
@@ -144,17 +173,34 @@ export default function App() {
           </div>
 
         </div>
+
       )}
 
       {/* ADMIN PANEL */}
 
       {adminMode && (
 
-        <div className="max-w-3xl mx-auto mt-20 bg-[#0d1220] border border-white/10 rounded-[40px] p-10">
+        <div className="max-w-3xl mx-auto mt-24 bg-[#081022] border border-white/10 rounded-[40px] p-10">
 
           <h2 className="text-5xl font-black text-center mb-10">
-            Welcome Cup erstellen
+            Turnier erstellen
           </h2>
+
+          <input
+            type="text"
+            placeholder="Wie soll das Turnier heißen?"
+            value={cupName}
+            onChange={(e) => setCupName(e.target.value)}
+            className="w-full bg-black border border-zinc-700 rounded-2xl p-5 mb-6"
+          />
+
+          <input
+            type="number"
+            placeholder="Wie viele Teams?"
+            value={teamCount}
+            onChange={(e) => setTeamCount(e.target.value)}
+            className="w-full bg-black border border-zinc-700 rounded-2xl p-5 mb-6"
+          />
 
           <textarea
             placeholder="Ein Team pro Zeile"
@@ -164,7 +210,7 @@ export default function App() {
           />
 
           <button
-            onClick={createCup}
+            onClick={createTournament}
             className="w-full mt-8 bg-white text-black py-5 rounded-2xl text-xl font-black"
           >
             Teams auslosen
@@ -174,193 +220,202 @@ export default function App() {
 
       )}
 
+      {/* TURNIERE */}
+
+      <div className="mt-32 px-10 pb-24">
+
+        <h2 className="text-5xl font-black text-center mb-16">
+          Laufende Turniere
+        </h2>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 max-w-6xl mx-auto">
+
+          {tournaments.map((tournament) => (
+
+            <div
+              key={tournament.id}
+              className="bg-[#081022] border border-white/10 rounded-[35px] p-8"
+            >
+
+              <h3 className="text-3xl font-black mb-4">
+                {tournament.name}
+              </h3>
+
+              <p className="text-zinc-400 text-xl mb-8">
+                {tournament.stage}
+              </p>
+
+              <div className="flex gap-4 flex-wrap">
+
+                <button
+                  onClick={() => setSelectedTournament(tournament)}
+                  className="bg-white text-black px-6 py-4 rounded-2xl font-black"
+                >
+                  Turnier öffnen
+                </button>
+
+                {adminMode && (
+                  <button
+                    onClick={() => deleteTournament(tournament.id)}
+                    className="bg-red-600 px-6 py-4 rounded-2xl font-black"
+                  >
+                    Turnier löschen
+                  </button>
+                )}
+
+              </div>
+
+            </div>
+
+          ))}
+
+        </div>
+
+      </div>
+
       {/* TURNIERBAUM */}
 
-      {teams.length > 0 && (
+      {selectedTournament && (
 
-        <div className="min-w-[1800px] px-20 py-24">
+        <div className="px-10 pb-32">
 
-          <div className="grid grid-cols-3 gap-24">
+          <div className="max-w-[1700px] mx-auto">
 
-            {/* VIERTELFINALE */}
+            <div className="flex justify-between items-center mb-16">
 
-            <div>
+              <div>
+                <h2 className="text-5xl font-black">
+                  {selectedTournament.name}
+                </h2>
 
-              <h2 className="text-4xl font-black text-center mb-14">
-                Viertelfinale
-              </h2>
-
-              <div className="space-y-12">
-
-                {[0, 1, 2, 3].map((i) => (
-
-                  <div
-                    key={i}
-                    className="bg-[#0d1220] border border-white/10 rounded-3xl p-6"
-                  >
-
-                    <div className="flex items-center justify-between pb-5">
-
-                      <span className="text-2xl font-black">
-                        {teams[i * 2] || "TBD"}
-                      </span>
-
-                      {adminMode && teams[i * 2] && (
-                        <button
-                          onClick={() => addSemi(teams[i * 2])}
-                          className="bg-white text-black px-5 py-3 rounded-xl font-black"
-                        >
-                          Weiter
-                        </button>
-                      )}
-
-                    </div>
-
-                    <div className="border-t border-white/10 pt-5 flex items-center justify-between">
-
-                      <span className="text-2xl font-black">
-                        {teams[i * 2 + 1] || "TBD"}
-                      </span>
-
-                      {adminMode && teams[i * 2 + 1] && (
-                        <button
-                          onClick={() => addSemi(teams[i * 2 + 1])}
-                          className="bg-white text-black px-5 py-3 rounded-xl font-black"
-                        >
-                          Weiter
-                        </button>
-                      )}
-
-                    </div>
-
-                  </div>
-
-                ))}
-
+                <p className="text-zinc-400 text-2xl mt-3">
+                  {selectedTournament.stage}
+                </p>
               </div>
+
+              <button
+                onClick={() => setSelectedTournament(null)}
+                className="bg-white text-black px-6 py-4 rounded-2xl font-black"
+              >
+                Ansicht schließen
+              </button>
 
             </div>
 
-            {/* HALBFINALE */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-20">
 
-            <div>
+              {/* VIERTELFINALE */}
 
-              <h2 className="text-4xl font-black text-center mb-14">
-                Halbfinale
-              </h2>
+              <div>
 
-              <div className="space-y-32 mt-24">
+                <h3 className="text-4xl font-black mb-12 text-center">
+                  {selectedTournament.stage}
+                </h3>
 
-                {[0, 1].map((i) => (
+                <div className="space-y-10">
 
-                  <div
-                    key={i}
-                    className="bg-[#0d1220] border border-cyan-400 rounded-3xl p-6"
-                  >
+                  {selectedTournament.matches.map((match, index) => (
 
-                    <div className="flex items-center justify-between pb-5">
+                    <div
+                      key={index}
+                      className="bg-[#081022] border border-white/10 rounded-[30px] p-6"
+                    >
 
-                      <span className="text-2xl font-black">
-                        {semiFinals[i * 2] || "TBD"}
-                      </span>
+                      <div className="flex justify-between items-center border-b border-white/10 pb-5">
 
-                      {adminMode && semiFinals[i * 2] && (
-                        <button
-                          onClick={() => addFinal(semiFinals[i * 2])}
-                          className="bg-white text-black px-5 py-3 rounded-xl font-black"
-                        >
+                        <span className="text-3xl font-black">
+                          {match[0]}
+                        </span>
+
+                        <button className="bg-white text-black px-5 py-3 rounded-2xl font-black">
                           Weiter
                         </button>
-                      )}
+
+                      </div>
+
+                      <div className="flex justify-between items-center pt-5">
+
+                        <span className="text-3xl font-black">
+                          {match[1]}
+                        </span>
+
+                        <button className="bg-white text-black px-5 py-3 rounded-2xl font-black">
+                          Weiter
+                        </button>
+
+                      </div>
 
                     </div>
 
-                    <div className="border-t border-white/10 pt-5 flex items-center justify-between">
-
-                      <span className="text-2xl font-black">
-                        {semiFinals[i * 2 + 1] || "TBD"}
-                      </span>
-
-                      {adminMode && semiFinals[i * 2 + 1] && (
-                        <button
-                          onClick={() => addFinal(semiFinals[i * 2 + 1])}
-                          className="bg-white text-black px-5 py-3 rounded-xl font-black"
-                        >
-                          Weiter
-                        </button>
-                      )}
-
-                    </div>
-
-                  </div>
-
-                ))}
-
-              </div>
-
-            </div>
-
-            {/* FINALE */}
-
-            <div>
-
-              <h2 className="text-4xl font-black text-center mb-14">
-                Finale
-              </h2>
-
-              <div className="bg-[#0d1220] border border-yellow-400 rounded-3xl p-6 mt-56">
-
-                <div className="flex items-center justify-between pb-5">
-
-                  <span className="text-2xl font-black">
-                    {finals[0] || "TBD"}
-                  </span>
-
-                  {adminMode && finals[0] && (
-                    <button
-                      onClick={() => setWinner(finals[0])}
-                      className="bg-yellow-400 text-black px-5 py-3 rounded-xl font-black"
-                    >
-                      Sieger?
-                    </button>
-                  )}
-
-                </div>
-
-                <div className="border-t border-white/10 pt-5 flex items-center justify-between">
-
-                  <span className="text-2xl font-black">
-                    {finals[1] || "TBD"}
-                  </span>
-
-                  {adminMode && finals[1] && (
-                    <button
-                      onClick={() => setWinner(finals[1])}
-                      className="bg-yellow-400 text-black px-5 py-3 rounded-xl font-black"
-                    >
-                      Sieger?
-                    </button>
-                  )}
+                  ))}
 
                 </div>
 
               </div>
 
-              {winner && (
+              {/* HALBFINALE */}
 
-                <div className="text-center mt-12">
+              <div>
 
-                  <div className="text-5xl font-black text-yellow-400">
-                    🏆 {winner}
+                <h3 className="text-4xl font-black mb-12 text-center">
+                  Halbfinale
+                </h3>
+
+                <div className="space-y-24 mt-20">
+
+                  <div className="bg-[#081022] border border-cyan-400 rounded-[30px] p-6">
+
+                    <div className="border-b border-white/10 pb-5 text-3xl font-black">
+                      TBD
+                    </div>
+
+                    <div className="pt-5 text-3xl font-black">
+                      TBD
+                    </div>
+
                   </div>
 
-                  <p className="text-2xl text-zinc-300 mt-4">
-                    gewinnt den Angel Welcome Cup!
-                  </p>
+                  <div className="bg-[#081022] border border-cyan-400 rounded-[30px] p-6">
+
+                    <div className="border-b border-white/10 pb-5 text-3xl font-black">
+                      TBD
+                    </div>
+
+                    <div className="pt-5 text-3xl font-black">
+                      TBD
+                    </div>
+
+                  </div>
 
                 </div>
 
-              )}
+              </div>
+
+              {/* FINALE */}
+
+              <div>
+
+                <h3 className="text-4xl font-black mb-12 text-center">
+                  Finale
+                </h3>
+
+                <div className="mt-44">
+
+                  <div className="bg-[#081022] border border-yellow-400 rounded-[30px] p-6">
+
+                    <div className="border-b border-white/10 pb-5 text-3xl font-black">
+                      TBD
+                    </div>
+
+                    <div className="pt-5 text-3xl font-black">
+                      TBD
+                    </div>
+
+                  </div>
+
+                </div>
+
+              </div>
 
             </div>
 
