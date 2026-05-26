@@ -31,7 +31,7 @@ export default function App() {
 
   const createCup = () => {
     const list = teamsInput
-      .split("\\n")
+      .split("\n")
       .map((t) => t.trim())
       .filter(Boolean);
 
@@ -42,13 +42,13 @@ export default function App() {
   };
 
   const addSemi = (team) => {
-    if (!semiFinals.includes(team)) {
+    if (!semiFinals.includes(team) && semiFinals.length < 4) {
       setSemiFinals([...semiFinals, team]);
     }
   };
 
   const addFinal = (team) => {
-    if (!finals.includes(team)) {
+    if (!finals.includes(team) && finals.length < 2) {
       setFinals([...finals, team]);
     }
   };
@@ -63,9 +63,9 @@ export default function App() {
         <div className="flex items-center gap-5">
 
           <img
-            src="https://placehold.co/120x120/png"
-            alt="Logo"
-            className="w-24 h-24 rounded-3xl"
+            src="/logo.png"
+            alt="Angel Tournaments"
+            className="w-32 h-32 object-contain"
           />
 
           <div>
@@ -100,12 +100,12 @@ export default function App() {
       <div className="text-center mt-10 px-6">
 
         <h2 className="text-5xl font-black">
-          🏆 Willkommen bei Angel Tournaments
+          Willkommen bei Angel Tournaments 🏆
         </h2>
 
         <p className="text-zinc-400 text-2xl mt-6 max-w-4xl mx-auto leading-relaxed">
-          Die neue FC 26 Pro Clubs Plattform für spannende Turniere,
-          starke Communities und echte Wettbewerbe. ⚽🔥
+          Die neue FC 26 Pro Clubs Plattform für spannende Cups,
+          starke Communities und echte Wettbewerbe.
         </p>
 
       </div>
@@ -153,7 +153,7 @@ export default function App() {
         </div>
       )}
 
-      {/* ADMIN */}
+      {/* ADMIN PANEL */}
 
       {adminMode && (
 
@@ -178,6 +178,7 @@ export default function App() {
           </button>
 
         </div>
+
       )}
 
       {/* TURNIERBAUM */}
@@ -188,7 +189,7 @@ export default function App() {
 
           <div className="grid grid-cols-3 gap-24">
 
-            {/* VF */}
+            {/* VIERTELFINALE */}
 
             <div>
 
@@ -198,7 +199,7 @@ export default function App() {
 
               <div className="space-y-10">
 
-                {[0,1,2,3].map((i) => (
+                {[0, 1, 2, 3].map((i) => (
 
                   <div
                     key={i}
@@ -243,7 +244,7 @@ export default function App() {
 
             </div>
 
-            {/* HF */}
+            {/* HALBFINALE */}
 
             <div>
 
@@ -253,11 +254,11 @@ export default function App() {
 
               <div className="space-y-24 mt-24">
 
-                {[0,1].map((i) => (
+                {[0, 1].map((i) => (
 
                   <div
                     key={i}
-                    className="bg-[#0d1220] border border-white/10 rounded-3xl p-6"
+                    className="bg-[#0d1220] border border-cyan-400 rounded-3xl p-6"
                   >
 
                     {[semiFinals[i * 2], semiFinals[i * 2 + 1]].map((team, idx) => (
