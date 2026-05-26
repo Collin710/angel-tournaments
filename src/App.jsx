@@ -6,26 +6,8 @@ export default function App() {
         color: "white",
         minHeight: "100vh",
         fontFamily: "Arial, sans-serif",
-        position: "relative",
-        overflow: "hidden",
       }}
     >
-      {/* Hintergrund Logo */}
-      <img
-        src="/logo.png"
-        alt="Angel Logo"
-        style={{
-          position: "absolute",
-          top: "50%",
-          left: "50%",
-          transform: "translate(-50%, -50%)",
-          width: "700px",
-          opacity: "0.08",
-          zIndex: "0",
-          pointerEvents: "none",
-        }}
-      />
-
       {/* Header */}
       <div
         style={{
@@ -33,14 +15,12 @@ export default function App() {
           justifyContent: "space-between",
           alignItems: "center",
           padding: "30px 50px",
-          position: "relative",
-          zIndex: "2",
         }}
       >
         <div>
           <h1
             style={{
-              fontSize: "58px",
+              fontSize: "60px",
               fontWeight: "900",
               margin: "0",
               letterSpacing: "2px",
@@ -81,9 +61,7 @@ export default function App() {
       <div
         style={{
           textAlign: "center",
-          marginTop: "140px",
-          position: "relative",
-          zIndex: "2",
+          marginTop: "150px",
           padding: "0 20px",
         }}
       >
@@ -109,6 +87,22 @@ export default function App() {
           Die neue FC 26 Pro Clubs Plattform für spannende Cups,
           starke Communities und echte Wettbewerbe.
         </p>
+
+        <button
+          style={{
+            marginTop: "60px",
+            backgroundColor: "white",
+            color: "black",
+            border: "none",
+            padding: "18px 40px",
+            borderRadius: "15px",
+            fontSize: "20px",
+            fontWeight: "bold",
+            cursor: "pointer",
+          }}
+        >
+          Turnier erstellen
+        </button>
       </div>
     </div>
   );
