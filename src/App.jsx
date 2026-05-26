@@ -62,14 +62,6 @@ export default function App() {
     setTeamsInput("");
   };
 
-  const deleteTournament = (id) => {
-    setTournaments(tournaments.filter((t) => t.id !== id));
-
-    if (selectedTournament?.id === id) {
-      setSelectedTournament(null);
-    }
-  };
-
   return (
     <div className="min-h-screen bg-black text-white">
 
@@ -175,6 +167,8 @@ export default function App() {
             Turnier erstellen
           </h2>
 
+          {/* TURNIERNAME */}
+
           <input
             type="text"
             placeholder="Wie soll das Turnier heißen?"
@@ -183,6 +177,8 @@ export default function App() {
             className="w-full bg-black border border-zinc-700 rounded-2xl p-5 mb-6"
           />
 
+          {/* TEAMANZAHL */}
+
           <input
             type="number"
             placeholder="Wie viele Teams?"
@@ -190,6 +186,8 @@ export default function App() {
             onChange={(e) => setTeamCount(e.target.value)}
             className="w-full bg-black border border-zinc-700 rounded-2xl p-5 mb-6"
           />
+
+          {/* TEAMS */}
 
           <textarea
             placeholder="Ein Team pro Zeile"
@@ -234,27 +232,12 @@ export default function App() {
                 {tournament.stage}
               </p>
 
-              <div className="flex gap-4 flex-wrap">
-
-                <button
-                  onClick={() => setSelectedTournament(tournament)}
-                  className="bg-white text-black px-6 py-4 rounded-2xl font-black"
-                >
-                  Turnier öffnen
-                </button>
-
-                {/* TURNIER LÖSCHEN NUR FÜR ADMINS */}
-
-                {adminMode && (
-                  <button
-                    onClick={() => deleteTournament(tournament.id)}
-                    className="bg-red-600 px-6 py-4 rounded-2xl font-black"
-                  >
-                    Turnier löschen
-                  </button>
-                )}
-
-              </div>
+              <button
+                onClick={() => setSelectedTournament(tournament)}
+                className="bg-white text-black px-6 py-4 rounded-2xl font-black"
+              >
+                Turnier öffnen
+              </button>
 
             </div>
 
@@ -272,30 +255,13 @@ export default function App() {
 
           <div className="max-w-7xl mx-auto bg-[#0d1220] border border-white/10 rounded-[40px] p-10">
 
-            <div className="flex justify-between items-center mb-10 flex-wrap gap-5">
+            <h2 className="text-5xl font-black text-center mb-5">
+              {selectedTournament.name}
+            </h2>
 
-              <div>
-                <h2 className="text-5xl font-black">
-                  {selectedTournament.name}
-                </h2>
-
-                <p className="text-zinc-400 text-2xl mt-3">
-                  {selectedTournament.stage}
-                </p>
-              </div>
-
-              {/* ANSICHT SCHLIEßEN FÜR ALLE */}
-
-              <button
-                onClick={() => setSelectedTournament(null)}
-                className="bg-white text-black px-6 py-4 rounded-2xl font-black"
-              >
-                Ansicht schließen
-              </button>
-
-            </div>
-
-            {/* TURNIERBAUM */}
+            <p className="text-center text-zinc-400 text-2xl mb-14">
+              {selectedTournament.stage}
+            </p>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
 
