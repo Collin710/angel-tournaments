@@ -74,7 +74,7 @@ export default function App() {
         <div className="flex items-center gap-5">
 
           <img
-            src="./logo.png"
+            src="/logo.png"
             alt="Angel"
             className="w-28 h-28 object-contain"
           />
