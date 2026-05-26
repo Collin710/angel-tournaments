@@ -3,13 +3,16 @@ import { useState } from "react";
 export default function App() {
   const [adminMode, setAdminMode] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
+
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
   const [teamsInput, setTeamsInput] = useState("");
   const [teams, setTeams] = useState([]);
-  const [semi, setSemi] = useState([]);
+
+  const [semiFinals, setSemiFinals] = useState([]);
   const [finals, setFinals] = useState([]);
+
   const [winner, setWinner] = useState("");
 
   const ADMIN_USER = "AngelAdmin";
@@ -22,34 +25,59 @@ export default function App() {
     }
   };
 
-  const shuffle = (arr) => [...arr].sort(() => Math.random() - 0.5);
+  const shuffle = (array) => {
+    return [...array].sort(() => Math.random() - 0.5);
+  };
 
   const createCup = () => {
     const list = teamsInput
-      .split("\n")
+      .split("\\n")
       .map((t) => t.trim())
       .filter(Boolean);
 
     setTeams(shuffle(list));
-    setSemi([]);
+    setSemiFinals([]);
     setFinals([]);
     setWinner("");
   };
 
   const addSemi = (team) => {
-    if (!semi.includes(team)) setSemi([...semi, team]);
+    if (!semiFinals.includes(team)) {
+      setSemiFinals([...semiFinals, team]);
+    }
   };
 
   const addFinal = (team) => {
-    if (!finals.includes(team)) setFinals([...finals, team]);
+    if (!finals.includes(team)) {
+      setFinals([...finals, team]);
+    }
   };
 
   return (
-    <div className="min-h-screen bg-black text-white p-8">
-      <div className="flex justify-between items-center mb-12">
-        <div>
-          <h1 className="text-6xl font-black">ANGEL</h1>
-          <p className="text-zinc-400 tracking-[0.4em]">TOURNAMENTS</p>
+    <div className="min-h-screen bg-black text-white overflow-x-auto">
+
+      {/* HEADER */}
+
+      <div className="flex items-center justify-between px-10 py-8">
+
+        <div className="flex items-center gap-5">
+
+          <img
+            src="https://placehold.co/120x120/png"
+            alt="Logo"
+            className="w-24 h-24 rounded-3xl"
+          />
+
+          <div>
+            <h1 className="text-6xl font-black tracking-wide">
+              ANGEL
+            </h1>
+
+            <p className="text-zinc-400 tracking-[0.5em] uppercase">
+              TOURNAMENTS
+            </p>
+          </div>
+
         </div>
 
         <button
@@ -60,33 +88,55 @@ export default function App() {
               setShowLogin(true);
             }
           }}
-          className="bg-white text-black px-6 py-3 rounded-2xl font-bold"
+          className="bg-white text-black px-7 py-4 rounded-2xl font-black"
         >
           {adminMode ? "Ausloggen" : "Admin Login"}
         </button>
+
       </div>
 
+      {/* BIO */}
+
+      <div className="text-center mt-10 px-6">
+
+        <h2 className="text-5xl font-black">
+          🏆 Willkommen bei Angel Tournaments
+        </h2>
+
+        <p className="text-zinc-400 text-2xl mt-6 max-w-4xl mx-auto leading-relaxed">
+          Die neue FC 26 Pro Clubs Plattform für spannende Turniere,
+          starke Communities und echte Wettbewerbe. ⚽🔥
+        </p>
+
+      </div>
+
+      {/* LOGIN */}
+
       {showLogin && (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center">
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
+
           <div className="bg-zinc-900 p-8 rounded-3xl w-full max-w-md">
-            <h2 className="text-3xl font-black mb-6 text-center">
-              Admin Login
+
+            <h2 className="text-4xl font-black text-center mb-8">
+              ADMIN LOGIN
             </h2>
 
-            <div className="space-y-4">
+            <div className="space-y-5">
+
               <input
-                className="w-full bg-black border border-zinc-700 rounded-xl p-4"
+                type="text"
                 placeholder="Benutzername"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
+                className="w-full bg-black border border-zinc-700 rounded-xl p-4"
               />
 
               <input
                 type="password"
-                className="w-full bg-black border border-zinc-700 rounded-xl p-4"
                 placeholder="Passwort"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                className="w-full bg-black border border-zinc-700 rounded-xl p-4"
               />
 
               <button
@@ -95,146 +145,225 @@ export default function App() {
               >
                 Einloggen
               </button>
+
             </div>
+
           </div>
+
         </div>
       )}
 
+      {/* ADMIN */}
+
       {adminMode && (
-        <div className="bg-zinc-900 p-8 rounded-3xl mb-16 max-w-2xl">
-          <h2 className="text-4xl font-black mb-6">
+
+        <div className="max-w-3xl mx-auto mt-20 bg-[#0d1220] border border-white/10 rounded-[40px] p-10">
+
+          <h2 className="text-5xl font-black text-center mb-10">
             Welcome Cup erstellen
           </h2>
 
           <textarea
-            className="w-full h-56 bg-black border border-zinc-700 rounded-2xl p-4"
             placeholder="Ein Team pro Zeile"
             value={teamsInput}
             onChange={(e) => setTeamsInput(e.target.value)}
+            className="w-full h-72 bg-black border border-zinc-700 rounded-2xl p-5"
           />
 
           <button
             onClick={createCup}
-            className="mt-6 bg-white text-black px-8 py-4 rounded-2xl font-black"
+            className="w-full mt-8 bg-white text-black py-5 rounded-2xl text-xl font-black"
           >
             Teams auslosen
           </button>
+
         </div>
       )}
+
+      {/* TURNIERBAUM */}
 
       {teams.length > 0 && (
-        <div className="grid grid-cols-3 gap-16">
-          <div>
-            <h2 className="text-3xl font-black mb-8 text-center">
-              Viertelfinale
-            </h2>
 
-            <div className="space-y-8">
-              {[0, 1, 2, 3].map((i) => (
-                <div
-                  key={i}
-                  className="bg-zinc-900 border border-zinc-800 rounded-3xl p-6"
-                >
-                  {[teams[i * 2], teams[i * 2 + 1]].map((team, idx) => (
-                    <div
-                      key={idx}
-                      className={`flex justify-between items-center ${
-                        idx === 0 ? "pb-4" : "pt-4 border-t border-zinc-700"
-                      }`}
-                    >
-                      <span className="font-bold text-xl">{team || "TBD"}</span>
+        <div className="min-w-[1800px] px-20 py-24">
 
-                      {adminMode && team && (
-                        <button
-                          onClick={() => addSemi(team)}
-                          className="bg-white text-black px-4 py-2 rounded-xl font-bold"
-                        >
-                          Weiter
-                        </button>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              ))}
-            </div>
-          </div>
+          <div className="grid grid-cols-3 gap-24">
 
-          <div>
-            <h2 className="text-3xl font-black mb-8 text-center">
-              Halbfinale
-            </h2>
+            {/* VF */}
 
-            <div className="space-y-16 mt-24">
-              {[0, 1].map((i) => (
-                <div
-                  key={i}
-                  className="bg-zinc-900 border border-zinc-800 rounded-3xl p-6"
-                >
-                  {[semi[i * 2], semi[i * 2 + 1]].map((team, idx) => (
-                    <div
-                      key={idx}
-                      className={`flex justify-between items-center ${
-                        idx === 0 ? "pb-4" : "pt-4 border-t border-zinc-700"
-                      }`}
-                    >
-                      <span className="font-bold text-xl">{team || "TBD"}</span>
+            <div>
 
-                      {adminMode && team && (
-                        <button
-                          onClick={() => addFinal(team)}
-                          className="bg-white text-black px-4 py-2 rounded-xl font-bold"
-                        >
-                          Weiter
-                        </button>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              ))}
-            </div>
-          </div>
+              <h2 className="text-4xl font-black text-center mb-14">
+                Viertelfinale
+              </h2>
 
-          <div>
-            <h2 className="text-3xl font-black mb-8 text-center">
-              Finale
-            </h2>
+              <div className="space-y-10">
 
-            <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-6 mt-40">
-              {[finals[0], finals[1]].map((team, idx) => (
-                <div
-                  key={idx}
-                  className={`flex justify-between items-center ${
-                    idx === 0 ? "pb-4" : "pt-4 border-t border-zinc-700"
-                  }`}
-                >
-                  <span className="font-bold text-2xl">{team || "TBD"}</span>
+                {[0,1,2,3].map((i) => (
 
-                  {adminMode && team && (
-                    <button
-                      onClick={() => setWinner(team)}
-                      className="bg-yellow-400 text-black px-4 py-2 rounded-xl font-black"
-                    >
-                      Sieger?
-                    </button>
-                  )}
-                </div>
-              ))}
-            </div>
+                  <div
+                    key={i}
+                    className="bg-[#0d1220] border border-white/10 rounded-3xl p-6"
+                  >
 
-            {winner && (
-              <div className="mt-10 text-center">
-                <div className="text-4xl font-black text-yellow-400">
-                  🏆 {winner}
-                </div>
+                    {[teams[i * 2], teams[i * 2 + 1]].map((team, idx) => (
 
-                <p className="text-xl mt-2">
-                  gewinnt den Angel Welcome Cup!
-                </p>
+                      <div
+                        key={idx}
+                        className={`flex items-center justify-between ${
+                          idx === 0
+                            ? "pb-4"
+                            : "pt-4 border-t border-white/10"
+                        }`}
+                      >
+
+                        <span className="text-2xl font-black">
+                          {team || "TBD"}
+                        </span>
+
+                        {adminMode && team && (
+
+                          <button
+                            onClick={() => addSemi(team)}
+                            className="bg-white text-black px-5 py-3 rounded-xl font-black"
+                          >
+                            Weiter
+                          </button>
+
+                        )}
+
+                      </div>
+
+                    ))}
+
+                  </div>
+
+                ))}
+
               </div>
-            )}
+
+            </div>
+
+            {/* HF */}
+
+            <div>
+
+              <h2 className="text-4xl font-black text-center mb-14">
+                Halbfinale
+              </h2>
+
+              <div className="space-y-24 mt-24">
+
+                {[0,1].map((i) => (
+
+                  <div
+                    key={i}
+                    className="bg-[#0d1220] border border-white/10 rounded-3xl p-6"
+                  >
+
+                    {[semiFinals[i * 2], semiFinals[i * 2 + 1]].map((team, idx) => (
+
+                      <div
+                        key={idx}
+                        className={`flex items-center justify-between ${
+                          idx === 0
+                            ? "pb-4"
+                            : "pt-4 border-t border-white/10"
+                        }`}
+                      >
+
+                        <span className="text-2xl font-black">
+                          {team || "TBD"}
+                        </span>
+
+                        {adminMode && team && (
+
+                          <button
+                            onClick={() => addFinal(team)}
+                            className="bg-white text-black px-5 py-3 rounded-xl font-black"
+                          >
+                            Weiter
+                          </button>
+
+                        )}
+
+                      </div>
+
+                    ))}
+
+                  </div>
+
+                ))}
+
+              </div>
+
+            </div>
+
+            {/* FINALE */}
+
+            <div>
+
+              <h2 className="text-4xl font-black text-center mb-14">
+                Finale
+              </h2>
+
+              <div className="bg-[#0d1220] border border-yellow-400 rounded-3xl p-6 mt-52">
+
+                {[finals[0], finals[1]].map((team, idx) => (
+
+                  <div
+                    key={idx}
+                    className={`flex items-center justify-between ${
+                      idx === 0
+                        ? "pb-4"
+                        : "pt-4 border-t border-white/10"
+                    }`}
+                  >
+
+                    <span className="text-2xl font-black">
+                      {team || "TBD"}
+                    </span>
+
+                    {adminMode && team && (
+
+                      <button
+                        onClick={() => setWinner(team)}
+                        className="bg-yellow-400 text-black px-5 py-3 rounded-xl font-black"
+                      >
+                        Sieger?
+                      </button>
+
+                    )}
+
+                  </div>
+
+                ))}
+
+              </div>
+
+              {winner && (
+
+                <div className="text-center mt-12">
+
+                  <div className="text-5xl font-black text-yellow-400">
+                    🏆 {winner}
+                  </div>
+
+                  <p className="text-2xl text-zinc-300 mt-4">
+                    gewinnt den Angel Welcome Cup!
+                  </p>
+
+                </div>
+
+              )}
+
+            </div>
+
           </div>
+
         </div>
+
       )}
+
     </div>
   );
 }
