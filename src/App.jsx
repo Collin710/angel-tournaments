@@ -1,173 +1,141 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
+import { initializeApp } from "firebase/app";
+
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  onSnapshot,
+  deleteDoc,
+  doc,
+} from "firebase/firestore";
+
+
+
+// FIREBASE CONFIG
+const firebaseConfig = {
+  apiKey: "HIER_DEIN_API_KEY",
+  authDomain: "HIER_DEIN_AUTH_DOMAIN",
+  projectId: "angel-tournaments",
+  storageBucket: "angel-tournaments.appspot.com",
+  messagingSenderId: "HIER_DEIN_SENDER_ID",
+  appId: "HIER_DEIN_APP_ID",
+};
+
+
+
+// FIREBASE STARTEN
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+
+
+// LOGIN DATEN
+const ADMIN_USER = "AngelAdmin";
+const ADMIN_PASS = "AT2026";
+
+
 
 export default function App() {
   const [isAdmin, setIsAdmin] = useState(false);
+
   const [showLogin, setShowLogin] = useState(false);
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
-  const [tournamentName, setTournamentName] =
-    useState("");
+  const [tournamentName, setTournamentName] = useState("");
   const [teamsInput, setTeamsInput] = useState("");
 
   const [tournaments, setTournaments] = useState([]);
-  const [selectedTournament, setSelectedTournament] =
-    useState(null);
 
-  const adminUser = "AngelAdmin";
-  const adminPassword = "AT2026";
+  const [selectedTournament, setSelectedTournament] = useState(null);
 
-  const login = () => {
+
+
+  // TURNIERE LADEN
+  useEffect(() => {
+    const unsub = onSnapshot(collection(db, "tournaments"), (snapshot) => {
+      const data = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      setTournaments(data);
+    });
+
+    return () => unsub();
+  }, []);
+
+
+
+
+  // LOGIN
+  const handleLogin = () => {
     if (
-      username === adminUser &&
-      password === adminPassword
+      username === ADMIN_USER &&
+      password === ADMIN_PASS
     ) {
       setIsAdmin(true);
       setShowLogin(false);
-      setUsername("");
-      setPassword("");
     } else {
       alert("Falsche Daten");
     }
   };
 
-  const logout = () => {
-    setIsAdmin(false);
-  };
 
-  const shuffleTeams = (teams) => {
-    return [...teams].sort(() => Math.random() - 0.5);
-  };
 
-  const createTournament = () => {
+  // TURNIER ERSTELLEN
+  const createTournament = async () => {
     const teams = teamsInput
       .split("\n")
-      .map((team) => team.trim())
-      .filter((team) => team !== "");
+      .map((t) => t.trim())
+      .filter((t) => t !== "");
 
-    if (!tournamentName) {
-      alert("Bitte Turniernamen eingeben");
+    if (!tournamentName || teams.length < 2) {
+      alert("Bitte Namen + Teams eingeben");
       return;
     }
 
-    if (teams.length < 2) {
-      alert("Mindestens 2 Teams");
-      return;
-    }
+    const shuffled = [...teams].sort(() => Math.random() - 0.5);
 
-    const shuffled = shuffleTeams(teams);
-
-    const rounds = [];
-    let firstRound = [];
+    const matches = [];
 
     for (let i = 0; i < shuffled.length; i += 2) {
-      firstRound.push({
+      matches.push({
         team1: shuffled[i] || "Freilos",
         team2: shuffled[i + 1] || "Freilos",
+        winner: null,
       });
     }
 
-    rounds.push(firstRound);
-
-    let currentLength = firstRound.length;
-
-    while (currentLength > 1) {
-      currentLength = Math.ceil(currentLength / 2);
-
-      const nextRound = [];
-
-      for (let i = 0; i < currentLength; i++) {
-        nextRound.push({
-          team1: "TBD",
-          team2: "TBD",
-        });
-      }
-
-      rounds.push(nextRound);
-    }
-
-    const newTournament = {
-      id: Date.now(),
+    await addDoc(collection(db, "tournaments"), {
       name: tournamentName,
-      rounds,
-      winner: null,
-    };
-
-    setTournaments([...tournaments, newTournament]);
+      matches,
+      createdAt: Date.now(),
+    });
 
     setTournamentName("");
     setTeamsInput("");
   };
 
-  const advanceTeam = (
-    tournamentIndex,
-    roundIndex,
-    matchIndex,
-    team
-  ) => {
-    const updated = [...tournaments];
 
-    const isFinal =
-      roundIndex ===
-      updated[tournamentIndex].rounds.length - 1;
 
-    if (isFinal) {
-      updated[tournamentIndex].winner = team;
-
-      setTournaments(updated);
-
-      setTimeout(() => {
-        alert(
-          `🏆 Herzlichen Glückwunsch an ${team}!`
-        );
-      }, 200);
-
-      return;
-    }
-
-    const nextRound =
-      updated[tournamentIndex].rounds[roundIndex + 1];
-
-    const nextMatchIndex = Math.floor(matchIndex / 2);
-
-    if (matchIndex % 2 === 0) {
-      nextRound[nextMatchIndex].team1 = team;
-    } else {
-      nextRound[nextMatchIndex].team2 = team;
-    }
-
-    setTournaments(updated);
+  // TURNIER LÖSCHEN
+  const deleteTournament = async (id) => {
+    await deleteDoc(doc(db, "tournaments", id));
   };
 
-  const deleteTournament = (id) => {
-    const filtered = tournaments.filter(
-      (t) => t.id !== id
-    );
 
-    setTournaments(filtered);
-    setSelectedTournament(null);
-  };
-
-  const getRoundName = (totalRounds, index) => {
-    const remaining = totalRounds - index;
-
-    if (remaining === 1) return "🏆 Finale";
-    if (remaining === 2) return "🔥 Halbfinale";
-    if (remaining === 3) return "⚔ Viertelfinale";
-    if (remaining === 4) return "🎯 Achtelfinale";
-
-    return `Runde ${index + 1}`;
-  };
 
   return (
     <div
       style={{
         minHeight: "100vh",
-        background:
-          "linear-gradient(to bottom, #000000, #050816)",
+        background: "#000",
         color: "white",
-        padding: "25px",
+        padding: "40px",
         fontFamily: "Arial",
       }}
     >
@@ -182,10 +150,9 @@ export default function App() {
         <div>
           <h1
             style={{
-              fontSize: "58px",
+              fontSize: "55px",
               margin: 0,
               fontWeight: "900",
-              letterSpacing: "2px",
             }}
           >
             ANGEL
@@ -193,10 +160,9 @@ export default function App() {
 
           <p
             style={{
-              letterSpacing: "8px",
-              marginTop: "4px",
-              fontSize: "13px",
-              color: "#bbb",
+              margin: 0,
+              letterSpacing: "6px",
+              color: "#aaa",
             }}
           >
             TOURNAMENTS
@@ -206,19 +172,21 @@ export default function App() {
         {!isAdmin ? (
           <button
             onClick={() => setShowLogin(true)}
-            style={mainButton}
+            style={buttonStyle}
           >
             Admin Login
           </button>
         ) : (
           <button
-            onClick={logout}
-            style={mainButton}
+            onClick={() => setIsAdmin(false)}
+            style={buttonStyle}
           >
             Logout
           </button>
         )}
       </div>
+
+
 
       {/* HERO */}
       <div
@@ -229,8 +197,7 @@ export default function App() {
       >
         <h1
           style={{
-            fontSize: "62px",
-            marginBottom: "20px",
+            fontSize: "70px",
             fontWeight: "900",
           }}
         >
@@ -239,37 +206,40 @@ export default function App() {
 
         <p
           style={{
-            color: "#9ca3af",
+            color: "#aaa",
             fontSize: "24px",
-            lineHeight: "42px",
           }}
         >
           Die neue FC 26 Pro Clubs Plattform
-          <br />
-          für spannende Cups und echte Wettbewerbe.
         </p>
       </div>
 
+
+
       {/* LOGIN */}
       {showLogin && (
-        <div style={loginBox}>
+        <div
+          style={{
+            maxWidth: "450px",
+            margin: "40px auto",
+            background: "#111",
+            padding: "40px",
+            borderRadius: "25px",
+          }}
+        >
           <h1
             style={{
               textAlign: "center",
-              fontSize: "55px",
-              marginBottom: "30px",
+              fontSize: "50px",
             }}
           >
             ADMIN LOGIN
           </h1>
 
           <input
-            type="text"
             placeholder="Benutzername"
             value={username}
-            onChange={(e) =>
-              setUsername(e.target.value)
-            }
+            onChange={(e) => setUsername(e.target.value)}
             style={inputStyle}
           />
 
@@ -277,19 +247,16 @@ export default function App() {
             type="password"
             placeholder="Passwort"
             value={password}
-            onChange={(e) =>
-              setPassword(e.target.value)
-            }
+            onChange={(e) => setPassword(e.target.value)}
             style={inputStyle}
           />
 
           <button
-            onClick={login}
+            onClick={handleLogin}
             style={{
-              ...mainButton,
+              ...buttonStyle,
               width: "100%",
-              marginTop: "25px",
-              fontSize: "22px",
+              marginTop: "20px",
             }}
           >
             Einloggen
@@ -297,21 +264,29 @@ export default function App() {
         </div>
       )}
 
+
+
       {/* ADMIN PANEL */}
       {isAdmin && (
-        <div style={adminBox}>
+        <div
+          style={{
+            maxWidth: "700px",
+            margin: "60px auto",
+            background: "#07112c",
+            padding: "40px",
+            borderRadius: "25px",
+          }}
+        >
           <h1
             style={{
               textAlign: "center",
-              marginBottom: "30px",
               fontSize: "45px",
             }}
           >
-            🏆 Turnier erstellen
+            Turnier erstellen
           </h1>
 
           <input
-            type="text"
             placeholder="Turniername"
             value={tournamentName}
             onChange={(e) =>
@@ -328,17 +303,15 @@ export default function App() {
             }
             style={{
               ...inputStyle,
-              height: "220px",
-              resize: "none",
+              height: "250px",
             }}
           />
 
           <button
             onClick={createTournament}
             style={{
-              ...mainButton,
+              ...buttonStyle,
               width: "100%",
-              marginTop: "25px",
             }}
           >
             Teams auslosen
@@ -346,174 +319,120 @@ export default function App() {
         </div>
       )}
 
-      {/* TOURNAMENTS */}
+
+
+      {/* TURNIERE */}
       <div
         style={{
-          marginTop: "70px",
           maxWidth: "900px",
-          marginInline: "auto",
+          margin: "80px auto",
         }}
       >
         <h1
           style={{
-            marginBottom: "30px",
-            fontSize: "45px",
+            textAlign: "center",
+            fontSize: "50px",
           }}
         >
           Laufende Turniere
         </h1>
 
-        {tournaments.map((tournament, index) => (
+        {tournaments.map((t) => (
           <div
-            key={tournament.id}
-            style={tournamentCard}
+            key={t.id}
+            style={{
+              background: "#07112c",
+              padding: "25px",
+              borderRadius: "20px",
+              marginTop: "20px",
+            }}
           >
-            <div>
-              <h2
-                style={{
-                  fontSize: "32px",
-                  marginBottom: "15px",
-                }}
-              >
-                {tournament.name}
-              </h2>
+            <h2>{t.name}</h2>
 
-              {tournament.winner && (
-                <p
-                  style={{
-                    color: "#facc15",
-                    fontWeight: "bold",
-                    fontSize: "20px",
-                  }}
-                >
-                  🏆 Sieger: {tournament.winner}
-                </p>
-              )}
-            </div>
-
-            <div
-              style={{
-                display: "flex",
-                gap: "15px",
-                flexWrap: "wrap",
-              }}
+            <button
+              onClick={() => setSelectedTournament(t)}
+              style={buttonStyle}
             >
+              Turnier öffnen
+            </button>
+
+            {isAdmin && (
               <button
                 onClick={() =>
-                  setSelectedTournament(index)
+                  deleteTournament(t.id)
                 }
-                style={mainButton}
+                style={{
+                  ...buttonStyle,
+                  marginLeft: "15px",
+                  background: "red",
+                  color: "white",
+                }}
               >
-                Turnier öffnen
+                Löschen
               </button>
-
-              {isAdmin && (
-                <button
-                  onClick={() =>
-                    deleteTournament(tournament.id)
-                  }
-                  style={deleteButton}
-                >
-                  Löschen
-                </button>
-              )}
-            </div>
+            )}
           </div>
         ))}
       </div>
 
-      {/* TOURNIERBAUM */}
-      {selectedTournament !== null && (
-        <div style={{ marginTop: "80px" }}>
-          <button
-            onClick={() =>
-              setSelectedTournament(null)
-            }
-            style={{
-              ...mainButton,
-              marginBottom: "40px",
-            }}
-          >
-            Ansicht schließen
-          </button>
 
+
+      {/* TURNIERBAUM */}
+      {selectedTournament && (
+        <div
+          style={{
+            maxWidth: "1200px",
+            margin: "100px auto",
+          }}
+        >
           <div
             style={{
               display: "flex",
-              gap: "70px",
-              overflowX: "auto",
-              paddingBottom: "50px",
+              justifyContent: "space-between",
+              marginBottom: "40px",
             }}
           >
-            {tournaments[
-              selectedTournament
-            ].rounds.map((round, roundIndex) => (
-              <div key={roundIndex}>
-                <h1
+            <h1>{selectedTournament.name}</h1>
+
+            <button
+              onClick={() =>
+                setSelectedTournament(null)
+              }
+              style={buttonStyle}
+            >
+              Ansicht schließen
+            </button>
+          </div>
+
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: "30px",
+            }}
+          >
+            {selectedTournament.matches.map(
+              (match, index) => (
+                <div
+                  key={index}
                   style={{
-                    marginBottom: "30px",
-                    textAlign: "center",
+                    background: "#07112c",
+                    padding: "25px",
+                    borderRadius: "20px",
                   }}
                 >
-                  {getRoundName(
-                    tournaments[selectedTournament]
-                      .rounds.length,
-                    roundIndex
-                  )}
-                </h1>
-
-                {round.map((match, matchIndex) => (
                   <div
-                    key={matchIndex}
-                    style={matchBox}
+                    style={{
+                      marginBottom: "20px",
+                    }}
                   >
-                    <div style={teamRow}>
-                      <span>{match.team1}</span>
-
-                      {isAdmin &&
-                        match.team1 !== "TBD" && (
-                          <button
-                            style={smallButton}
-                            onClick={() =>
-                              advanceTeam(
-                                selectedTournament,
-                                roundIndex,
-                                matchIndex,
-                                match.team1
-                              )
-                            }
-                          >
-                            Weiter
-                          </button>
-                        )}
-                    </div>
-
-                    <hr style={lineStyle} />
-
-                    <div style={teamRow}>
-                      <span>{match.team2}</span>
-
-                      {isAdmin &&
-                        match.team2 !== "TBD" && (
-                          <button
-                            style={smallButton}
-                            onClick={() =>
-                              advanceTeam(
-                                selectedTournament,
-                                roundIndex,
-                                matchIndex,
-                                match.team2
-                              )
-                            }
-                          >
-                            Weiter
-                          </button>
-                        )}
-                    </div>
+                    {match.team1}
                   </div>
-                ))}
-              </div>
-            ))}
+
+                  <div>{match.team2}</div>
+                </div>
+              )
+            )}
           </div>
         </div>
       )}
@@ -521,109 +440,28 @@ export default function App() {
   );
 }
 
-const mainButton = {
-  background:
-    "linear-gradient(to right, #ffffff, #d1d5db)",
+
+
+// STYLES
+const buttonStyle = {
+  background: "white",
   color: "black",
   border: "none",
-  padding: "14px 24px",
-  borderRadius: "14px",
-  fontWeight: "bold",
+  padding: "16px 30px",
+  borderRadius: "16px",
+  fontWeight: "700",
   cursor: "pointer",
-  fontSize: "16px",
-  transition: "0.2s",
-};
-
-const deleteButton = {
-  background:
-    "linear-gradient(to right, #ef4444, #dc2626)",
-  color: "white",
-  border: "none",
-  padding: "14px 24px",
-  borderRadius: "14px",
-  fontWeight: "bold",
-  cursor: "pointer",
-  fontSize: "16px",
+  fontSize: "18px",
 };
 
 const inputStyle = {
   width: "100%",
+  background: "black",
+  border: "1px solid #333",
+  borderRadius: "16px",
   padding: "18px",
-  marginTop: "18px",
-  background: "#000",
-  border: "2px solid #222",
-  borderRadius: "14px",
   color: "white",
-  fontSize: "17px",
-  boxSizing: "border-box",
-};
-
-const loginBox = {
-  maxWidth: "520px",
-  margin: "50px auto",
-  background:
-    "linear-gradient(to bottom, #151515, #0f0f0f)",
-  padding: "35px",
-  borderRadius: "30px",
-  boxShadow: "0 0 30px rgba(255,255,255,0.08)",
-};
-
-const adminBox = {
-  maxWidth: "750px",
-  margin: "70px auto",
-  background:
-    "linear-gradient(to bottom, #0b1020, #111827)",
-  padding: "40px",
-  borderRadius: "30px",
-  boxShadow: "0 0 30px rgba(59,130,246,0.15)",
-};
-
-const tournamentCard = {
-  background:
-    "linear-gradient(to right, #0f172a, #111827)",
-  padding: "30px",
-  borderRadius: "24px",
-  marginBottom: "25px",
-  display: "flex",
-  justifyContent: "space-between",
-  alignItems: "center",
-  flexWrap: "wrap",
-  gap: "20px",
-  border: "1px solid #1e293b",
-};
-
-const matchBox = {
-  background:
-    "linear-gradient(to bottom, #0b1020, #111827)",
-  padding: "22px",
-  borderRadius: "22px",
-  width: "340px",
-  marginBottom: "45px",
-  border: "2px solid #1e293b",
-  boxShadow: "0 0 20px rgba(59,130,246,0.12)",
-};
-
-const teamRow = {
-  display: "flex",
-  justifyContent: "space-between",
-  alignItems: "center",
-  gap: "20px",
   fontSize: "18px",
-  fontWeight: "bold",
-};
-
-const smallButton = {
-  background:
-    "linear-gradient(to right, #ffffff, #d1d5db)",
-  color: "black",
-  border: "none",
-  padding: "10px 15px",
-  borderRadius: "10px",
-  fontWeight: "bold",
-  cursor: "pointer",
-};
-
-const lineStyle = {
-  borderColor: "#243041",
-  margin: "16px 0",
+  marginTop: "20px",
+  boxSizing: "border-box",
 };
