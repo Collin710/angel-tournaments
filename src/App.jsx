@@ -189,37 +189,57 @@ export default function App() {
         fontFamily: "Arial",
       }}
     >
-      {/* LOGIN MODAL */}
+      {/* LOGIN */}
 
       {showLogin && (
         <div
           style={{
             position: "fixed",
             inset: 0,
-            background: "rgba(0,0,0,0.8)",
+            background: "rgba(0,0,0,0.85)",
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
             zIndex: 999,
+            backdropFilter: "blur(5px)",
           }}
         >
           <div
             style={{
-              background: "#061126",
-              padding: "40px",
-              borderRadius: "30px",
-              width: "400px",
+              width: "450px",
+              background:
+                "linear-gradient(145deg, #11131a, #1a1d26)",
+              borderRadius: "35px",
+              padding: "45px",
+              boxShadow: "0 0 40px rgba(0,0,0,0.6)",
             }}
           >
-            <h2
+            <h1
               style={{
-                fontSize: "40px",
-                marginBottom: "30px",
                 textAlign: "center",
+                fontSize: "58px",
+                fontWeight: "900",
+                marginBottom: "40px",
               }}
             >
-              Admin Login
-            </h2>
+              ADMIN LOGIN
+            </h1>
+
+            <input
+              type="text"
+              value="AngelAdmin"
+              readOnly
+              style={{
+                width: "100%",
+                padding: "22px",
+                borderRadius: "18px",
+                background: "black",
+                border: "2px solid #2b2f3d",
+                color: "white",
+                fontSize: "28px",
+                marginBottom: "25px",
+              }}
+            />
 
             <input
               type="password"
@@ -230,13 +250,13 @@ export default function App() {
               }
               style={{
                 width: "100%",
-                padding: "18px",
-                borderRadius: "15px",
+                padding: "22px",
+                borderRadius: "18px",
                 background: "black",
+                border: "2px solid #2b2f3d",
                 color: "white",
-                border: "1px solid #333",
-                marginBottom: "20px",
-                fontSize: "18px",
+                fontSize: "28px",
+                marginBottom: "30px",
               }}
             />
 
@@ -244,14 +264,14 @@ export default function App() {
               onClick={handleLogin}
               style={{
                 width: "100%",
-                background: "white",
+                background: "#f4f4f4",
                 color: "black",
                 border: "none",
-                padding: "18px",
-                borderRadius: "15px",
-                fontWeight: "bold",
+                padding: "22px",
+                borderRadius: "20px",
+                fontSize: "30px",
+                fontWeight: "900",
                 cursor: "pointer",
-                fontSize: "20px",
               }}
             >
               Einloggen
@@ -352,167 +372,6 @@ export default function App() {
           Die neue FC 26 Pro Clubs Plattform für spannende Cups,
           starke Communities und echte Wettbewerbe.
         </p>
-      </div>
-
-      {/* ADMIN PANEL */}
-
-      {isAdmin && (
-        <div
-          style={{
-            background: "#061126",
-            padding: "40px",
-            borderRadius: "30px",
-            maxWidth: "900px",
-            margin: "auto",
-            marginBottom: "80px",
-          }}
-        >
-          <h2
-            style={{
-              fontSize: "50px",
-              marginBottom: "40px",
-              textAlign: "center",
-            }}
-          >
-            Turnier erstellen
-          </h2>
-
-          <input
-            value={tournamentName}
-            onChange={(e) =>
-              setTournamentName(e.target.value)
-            }
-            placeholder="Turniername"
-            style={{
-              width: "100%",
-              padding: "20px",
-              borderRadius: "20px",
-              background: "black",
-              color: "white",
-              border: "1px solid #333",
-              marginBottom: "25px",
-              fontSize: "22px",
-            }}
-          />
-
-          <textarea
-            value={teamsInput}
-            onChange={(e) =>
-              setTeamsInput(e.target.value)
-            }
-            placeholder="Ein Team pro Zeile"
-            style={{
-              width: "100%",
-              height: "300px",
-              borderRadius: "20px",
-              background: "black",
-              color: "white",
-              border: "1px solid #333",
-              padding: "20px",
-              fontSize: "20px",
-              marginBottom: "30px",
-            }}
-          />
-
-          <button
-            onClick={createTournament}
-            style={{
-              width: "100%",
-              background: "white",
-              color: "black",
-              border: "none",
-              padding: "22px",
-              borderRadius: "20px",
-              fontSize: "28px",
-              fontWeight: "900",
-              cursor: "pointer",
-            }}
-          >
-            Teams auslosen
-          </button>
-        </div>
-      )}
-
-      {/* TURNIERE */}
-
-      <div
-        style={{
-          maxWidth: "1200px",
-          margin: "auto",
-        }}
-      >
-        <h2
-          style={{
-            fontSize: "50px",
-            marginBottom: "40px",
-          }}
-        >
-          Laufende Turniere
-        </h2>
-
-        {tournaments.map((tournament) => (
-          <div
-            key={tournament.id}
-            style={{
-              background: "#061126",
-              padding: "30px",
-              borderRadius: "25px",
-              marginBottom: "30px",
-            }}
-          >
-            <h2
-              style={{
-                fontSize: "40px",
-              }}
-            >
-              {tournament.name}
-            </h2>
-
-            <div
-              style={{
-                display: "flex",
-                gap: "20px",
-                marginTop: "20px",
-              }}
-            >
-              <button
-                onClick={() =>
-                  setSelectedTournament(tournament)
-                }
-                style={{
-                  background: "white",
-                  color: "black",
-                  border: "none",
-                  padding: "15px 30px",
-                  borderRadius: "15px",
-                  fontWeight: "bold",
-                  cursor: "pointer",
-                }}
-              >
-                Turnierbaum öffnen
-              </button>
-
-              {isAdmin && (
-                <button
-                  onClick={() =>
-                    deleteTournament(tournament.id)
-                  }
-                  style={{
-                    background: "red",
-                    color: "white",
-                    border: "none",
-                    padding: "15px 30px",
-                    borderRadius: "15px",
-                    fontWeight: "bold",
-                    cursor: "pointer",
-                  }}
-                >
-                  Turnier löschen
-                </button>
-              )}
-            </div>
-          </div>
-        ))}
       </div>
     </div>
   );
