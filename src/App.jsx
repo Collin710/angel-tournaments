@@ -7,11 +7,13 @@ export default function App() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
-  const [tournamentName, setTournamentName] = useState("");
+  const [tournamentName, setTournamentName] =
+    useState("");
   const [teamsInput, setTeamsInput] = useState("");
 
   const [tournaments, setTournaments] = useState([]);
-  const [selectedTournament, setSelectedTournament] = useState(null);
+  const [selectedTournament, setSelectedTournament] =
+    useState(null);
 
   const adminUser = "AngelAdmin";
   const adminPassword = "AT2026";
@@ -89,6 +91,7 @@ export default function App() {
       id: Date.now(),
       name: tournamentName,
       rounds,
+      winner: null,
     };
 
     setTournaments([...tournaments, newTournament]);
@@ -105,10 +108,26 @@ export default function App() {
   ) => {
     const updated = [...tournaments];
 
+    const isFinal =
+      roundIndex ===
+      updated[tournamentIndex].rounds.length - 1;
+
+    if (isFinal) {
+      updated[tournamentIndex].winner = team;
+
+      setTournaments(updated);
+
+      setTimeout(() => {
+        alert(
+          `🏆 Herzlichen Glückwunsch an ${team}!`
+        );
+      }, 200);
+
+      return;
+    }
+
     const nextRound =
       updated[tournamentIndex].rounds[roundIndex + 1];
-
-    if (!nextRound) return;
 
     const nextMatchIndex = Math.floor(matchIndex / 2);
 
@@ -133,10 +152,10 @@ export default function App() {
   const getRoundName = (totalRounds, index) => {
     const remaining = totalRounds - index;
 
-    if (remaining === 1) return "Finale";
-    if (remaining === 2) return "Halbfinale";
-    if (remaining === 3) return "Viertelfinale";
-    if (remaining === 4) return "Achtelfinale";
+    if (remaining === 1) return "🏆 Finale";
+    if (remaining === 2) return "🔥 Halbfinale";
+    if (remaining === 3) return "⚔ Viertelfinale";
+    if (remaining === 4) return "🎯 Achtelfinale";
 
     return `Runde ${index + 1}`;
   };
@@ -145,9 +164,10 @@ export default function App() {
     <div
       style={{
         minHeight: "100vh",
-        background: "black",
+        background:
+          "linear-gradient(to bottom, #000000, #050816)",
         color: "white",
-        padding: "20px",
+        padding: "25px",
         fontFamily: "Arial",
       }}
     >
@@ -162,9 +182,10 @@ export default function App() {
         <div>
           <h1
             style={{
-              fontSize: "55px",
+              fontSize: "58px",
               margin: 0,
-              lineHeight: "50px",
+              fontWeight: "900",
+              letterSpacing: "2px",
             }}
           >
             ANGEL
@@ -172,9 +193,10 @@ export default function App() {
 
           <p
             style={{
-              letterSpacing: "6px",
-              marginTop: "5px",
-              fontSize: "14px",
+              letterSpacing: "8px",
+              marginTop: "4px",
+              fontSize: "13px",
+              color: "#bbb",
             }}
           >
             TOURNAMENTS
@@ -184,14 +206,14 @@ export default function App() {
         {!isAdmin ? (
           <button
             onClick={() => setShowLogin(true)}
-            style={buttonStyle}
+            style={mainButton}
           >
             Admin Login
           </button>
         ) : (
           <button
             onClick={logout}
-            style={buttonStyle}
+            style={mainButton}
           >
             Logout
           </button>
@@ -202,13 +224,14 @@ export default function App() {
       <div
         style={{
           textAlign: "center",
-          marginTop: "70px",
+          marginTop: "80px",
         }}
       >
         <h1
           style={{
-            fontSize: "55px",
+            fontSize: "62px",
             marginBottom: "20px",
+            fontWeight: "900",
           }}
         >
           Willkommen bei Angel Tournaments 🏆
@@ -216,13 +239,14 @@ export default function App() {
 
         <p
           style={{
-            color: "#aaa",
-            fontSize: "22px",
-            lineHeight: "40px",
+            color: "#9ca3af",
+            fontSize: "24px",
+            lineHeight: "42px",
           }}
         >
-          Die neue FC 26 Pro Clubs Plattform für spannende
-          Cups, starke Communities und echte Wettbewerbe.
+          Die neue FC 26 Pro Clubs Plattform
+          <br />
+          für spannende Cups und echte Wettbewerbe.
         </p>
       </div>
 
@@ -233,7 +257,7 @@ export default function App() {
             style={{
               textAlign: "center",
               fontSize: "55px",
-              marginBottom: "35px",
+              marginBottom: "30px",
             }}
           >
             ADMIN LOGIN
@@ -262,10 +286,9 @@ export default function App() {
           <button
             onClick={login}
             style={{
-              ...buttonStyle,
+              ...mainButton,
               width: "100%",
               marginTop: "25px",
-              padding: "18px",
               fontSize: "22px",
             }}
           >
@@ -274,16 +297,17 @@ export default function App() {
         </div>
       )}
 
-      {/* ADMIN */}
+      {/* ADMIN PANEL */}
       {isAdmin && (
         <div style={adminBox}>
           <h1
             style={{
               textAlign: "center",
               marginBottom: "30px",
+              fontSize: "45px",
             }}
           >
-            Turnier erstellen
+            🏆 Turnier erstellen
           </h1>
 
           <input
@@ -312,9 +336,9 @@ export default function App() {
           <button
             onClick={createTournament}
             style={{
-              ...buttonStyle,
+              ...mainButton,
               width: "100%",
-              marginTop: "20px",
+              marginTop: "25px",
             }}
           >
             Teams auslosen
@@ -330,49 +354,75 @@ export default function App() {
           marginInline: "auto",
         }}
       >
-        <h1>Laufende Turniere</h1>
+        <h1
+          style={{
+            marginBottom: "30px",
+            fontSize: "45px",
+          }}
+        >
+          Laufende Turniere
+        </h1>
 
         {tournaments.map((tournament, index) => (
           <div
             key={tournament.id}
-            style={{
-              background: "#0b1020",
-              padding: "25px",
-              borderRadius: "20px",
-              marginTop: "20px",
-            }}
+            style={tournamentCard}
           >
-            <h2>{tournament.name}</h2>
-
-            <button
-              onClick={() =>
-                setSelectedTournament(index)
-              }
-              style={buttonStyle}
-            >
-              Turnier öffnen
-            </button>
-
-            {isAdmin && (
-              <button
-                onClick={() =>
-                  deleteTournament(tournament.id)
-                }
+            <div>
+              <h2
                 style={{
-                  ...buttonStyle,
-                  marginLeft: "15px",
-                  background: "red",
-                  color: "white",
+                  fontSize: "32px",
+                  marginBottom: "15px",
                 }}
               >
-                Löschen
+                {tournament.name}
+              </h2>
+
+              {tournament.winner && (
+                <p
+                  style={{
+                    color: "#facc15",
+                    fontWeight: "bold",
+                    fontSize: "20px",
+                  }}
+                >
+                  🏆 Sieger: {tournament.winner}
+                </p>
+              )}
+            </div>
+
+            <div
+              style={{
+                display: "flex",
+                gap: "15px",
+                flexWrap: "wrap",
+              }}
+            >
+              <button
+                onClick={() =>
+                  setSelectedTournament(index)
+                }
+                style={mainButton}
+              >
+                Turnier öffnen
               </button>
-            )}
+
+              {isAdmin && (
+                <button
+                  onClick={() =>
+                    deleteTournament(tournament.id)
+                  }
+                  style={deleteButton}
+                >
+                  Löschen
+                </button>
+              )}
+            </div>
           </div>
         ))}
       </div>
 
-      {/* BRACKET */}
+      {/* TOURNIERBAUM */}
       {selectedTournament !== null && (
         <div style={{ marginTop: "80px" }}>
           <button
@@ -380,7 +430,7 @@ export default function App() {
               setSelectedTournament(null)
             }
             style={{
-              ...buttonStyle,
+              ...mainButton,
               marginBottom: "40px",
             }}
           >
@@ -390,16 +440,21 @@ export default function App() {
           <div
             style={{
               display: "flex",
-              gap: "60px",
+              gap: "70px",
               overflowX: "auto",
-              paddingBottom: "40px",
+              paddingBottom: "50px",
             }}
           >
             {tournaments[
               selectedTournament
             ].rounds.map((round, roundIndex) => (
               <div key={roundIndex}>
-                <h1 style={{ marginBottom: "30px" }}>
+                <h1
+                  style={{
+                    marginBottom: "30px",
+                    textAlign: "center",
+                  }}
+                >
                   {getRoundName(
                     tournaments[selectedTournament]
                       .rounds.length,
@@ -433,12 +488,7 @@ export default function App() {
                         )}
                     </div>
 
-                    <hr
-                      style={{
-                        borderColor: "#333",
-                        margin: "15px 0",
-                      }}
-                    />
+                    <hr style={lineStyle} />
 
                     <div style={teamRow}>
                       <span>{match.team2}</span>
@@ -471,9 +521,23 @@ export default function App() {
   );
 }
 
-const buttonStyle = {
-  background: "white",
+const mainButton = {
+  background:
+    "linear-gradient(to right, #ffffff, #d1d5db)",
   color: "black",
+  border: "none",
+  padding: "14px 24px",
+  borderRadius: "14px",
+  fontWeight: "bold",
+  cursor: "pointer",
+  fontSize: "16px",
+  transition: "0.2s",
+};
+
+const deleteButton = {
+  background:
+    "linear-gradient(to right, #ef4444, #dc2626)",
+  color: "white",
   border: "none",
   padding: "14px 24px",
   borderRadius: "14px",
@@ -486,8 +550,8 @@ const inputStyle = {
   width: "100%",
   padding: "18px",
   marginTop: "18px",
-  background: "black",
-  border: "2px solid #333",
+  background: "#000",
+  border: "2px solid #222",
   borderRadius: "14px",
   color: "white",
   fontSize: "17px",
@@ -497,26 +561,46 @@ const inputStyle = {
 const loginBox = {
   maxWidth: "520px",
   margin: "50px auto",
-  background: "#111",
+  background:
+    "linear-gradient(to bottom, #151515, #0f0f0f)",
   padding: "35px",
   borderRadius: "30px",
+  boxShadow: "0 0 30px rgba(255,255,255,0.08)",
 };
 
 const adminBox = {
-  maxWidth: "700px",
+  maxWidth: "750px",
   margin: "70px auto",
-  background: "#0b1020",
-  padding: "35px",
+  background:
+    "linear-gradient(to bottom, #0b1020, #111827)",
+  padding: "40px",
   borderRadius: "30px",
+  boxShadow: "0 0 30px rgba(59,130,246,0.15)",
+};
+
+const tournamentCard = {
+  background:
+    "linear-gradient(to right, #0f172a, #111827)",
+  padding: "30px",
+  borderRadius: "24px",
+  marginBottom: "25px",
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  flexWrap: "wrap",
+  gap: "20px",
+  border: "1px solid #1e293b",
 };
 
 const matchBox = {
-  background: "#0b1020",
-  padding: "20px",
-  borderRadius: "20px",
-  width: "320px",
-  marginBottom: "40px",
+  background:
+    "linear-gradient(to bottom, #0b1020, #111827)",
+  padding: "22px",
+  borderRadius: "22px",
+  width: "340px",
+  marginBottom: "45px",
   border: "2px solid #1e293b",
+  boxShadow: "0 0 20px rgba(59,130,246,0.12)",
 };
 
 const teamRow = {
@@ -529,11 +613,17 @@ const teamRow = {
 };
 
 const smallButton = {
-  background: "white",
+  background:
+    "linear-gradient(to right, #ffffff, #d1d5db)",
   color: "black",
   border: "none",
   padding: "10px 15px",
   borderRadius: "10px",
   fontWeight: "bold",
   cursor: "pointer",
+};
+
+const lineStyle = {
+  borderColor: "#243041",
+  margin: "16px 0",
 };
