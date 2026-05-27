@@ -15,12 +15,13 @@ import {
 
 // FIREBASE CONFIG
 const firebaseConfig = {
-  apiKey: "HIER_DEIN_API_KEY",
-  authDomain: "HIER_DEIN_AUTH_DOMAIN",
+  apiKey: "AIzaSyCGgFkiRgBKLSkPZF4OH4liGuIzUas-nr4",
+  authDomain: "angel-tournaments.firebaseapp.com",
   projectId: "angel-tournaments",
-  storageBucket: "angel-tournaments.appspot.com",
-  messagingSenderId: "HIER_DEIN_SENDER_ID",
-  appId: "HIER_DEIN_APP_ID",
+  storageBucket: "angel-tournaments.firebasestorage.app",
+  messagingSenderId: "36676575179",
+  appId: "1:36676575179:web:4704d579925b0166e0204e",
+  measurementId: "G-5WNR7HP93P"
 };
 
 
@@ -106,7 +107,6 @@ export default function App() {
       matches.push({
         team1: shuffled[i] || "Freilos",
         team2: shuffled[i + 1] || "Freilos",
-        winner: null,
       });
     }
 
